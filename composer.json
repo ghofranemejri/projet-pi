@@ -2,7 +2,7 @@
     "name": "pc/medilab",
     "autoload": {
         "psr-4": {
-            "Pc\\Medilab\\": "src/"
+            "App\\": "src/"
         }
     },
     "require": {

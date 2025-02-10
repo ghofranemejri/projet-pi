@@ -1,12 +1,12 @@
 <?php
 
-namespace Pc\Medilab\Controller;
+namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
-final class AppController extends AbstractController
+class AppController extends AbstractController
 {
     #[Route('/', name: 'app_app')]
     public function index(): Response
