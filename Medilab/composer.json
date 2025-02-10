@@ -1,0 +1,19 @@
+{
+    "name": "pc/medilab",
+    "version": "1.0.0", 
+    "autoload": {
+        "psr-4": {
+            "Pc\\Medilab\\": "src/"
+        }
+    },
+    "require": {
+        "symfony/config": "6.4",
+        "symfony/console": "^6.4",
+        "symfony/monolog-bundle": "^3.10"
+    },
+    "extra": {
+        "symfony": {
+            "require": "6.4.*"
+        }
+    }
+}
