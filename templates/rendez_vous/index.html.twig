@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}RendezVous index{% endblock %}
+
+{% block body %}
+    <h1>RendezVous index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Motif</th>
+                <th>Patient</th>
+                <th>Médecin</th>
+                <th>Date_creation</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for rendez_vou in rendez_vouses %}
+            <tr>
+                <td>{{ rendez_vou.id }}</td>
+                <td>{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ rendez_vou.statut }}</td>
+                <td>{{ rendez_vou.motif }}</td>
+                <td>{{ rendez_vou.patient ? rendez_vou.patient.nom : 'N/A' }}</td>
+                <td>{{ rendez_vou.medecin ? rendez_vou.medecin.nom : 'N/A' }}</td>
+                <td>{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_rendez_vous_show', {'id': rendez_vou.id}) }}">show</a>
+                    <a href="{{ path('app_rendez_vous_edit', {'id': rendez_vou.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="8">No records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_rendez_vous_new') }}">Create new</a>
+{% endblock %}
