@@ -1,5 +1,5 @@
-{# templates/rendez_vous/_form.html.twig #}
-{{ form_start(form, {'action': path('app_rendez_vous_new')}) }}
+{# templates/rendez_vous_back/_form.html.twig #}
+{{ form_start(form) }}
 
 <div class="mb-3">
     {{ form_label(form.date, 'Date du rendez-vous', {'label_attr': {'class': 'form-label'}}) }}
@@ -38,10 +38,6 @@
     {{ form_errors(form.date_creation) }}
 </div>
 
-{# Lien pour annuler et revenir à la page d'accueil #}
-<a href="{{ path('app_front') }}" class="btn btn-secondary">Annuler</a>
-
-{# Le bouton pour enregistrer le formulaire #}
-<button type="submit" class="btn btn-primary">Enregistrer</button>
+<button class="btn btn-primary">Enregistrer</button>
 
 {{ form_end(form) }}

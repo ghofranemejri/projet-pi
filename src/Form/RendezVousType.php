@@ -49,7 +49,7 @@ class RendezVousType extends AbstractType
             ])
             ->add('patient', EntityType::class, [
                 'class' => Patient::class,
-                'choice_label' => 'nom', // Choisir un champ comme nom complet par exemple
+                'choice_label' => 'nom',
                 'label' => 'Sélectionner un patient',
                 'placeholder' => 'Choisir un patient',
             ])
