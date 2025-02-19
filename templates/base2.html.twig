@@ -79,7 +79,7 @@
             <li class="nav-heading">Pages</li>
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="{{ path('app_form_post_index') }}">
+                <a class="nav-link collapsed" href="{{ path('app_form_back_index') }}">
                     <i class="bi bi-person"></i>
                     <span>Liste des forum</span>
                 </a>
@@ -87,7 +87,7 @@
             
 
             <li class="nav-item">
-                <a class="nav-link collapsed" href="{{ path('app_form_post_new') }}">
+                <a class="nav-link collapsed" href="{{ path('app_form_back_new') }}">
                     <i class="bi bi-envelope"></i>
                     <span>new post</span>
                 </a>
@@ -112,6 +112,7 @@
 
     <main id="main" class="main">
         {% block content %}
+        
         {% endblock %}
     </main><!-- End Main Content -->
 

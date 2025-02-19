@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'base2.html.twig' %}
 
 {% block title %}Créer une nouvelle Réponse{% endblock %}
 
@@ -9,8 +9,7 @@
         {{ form_start(form) }}
             {{ form_widget(form) }}
         {{ form_end(form) }}
-        
 
-        <a href="{{ path('app_reponse_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+        <a href="{{ path('app_reponse_back_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
     </div>
 {% endblock %}

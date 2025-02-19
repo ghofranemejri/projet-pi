@@ -30,7 +30,7 @@ class Reponse
         return $this->nom;
     }
 
-    public function setNom(?FormPost $nom): static
+    public function setNom(?FormPost $nom): self
     {
         $this->nom = $nom;
 

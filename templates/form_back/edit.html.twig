@@ -1,0 +1,13 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Edit FormPost{% endblock %}
+
+{% block content %}
+    <h1>Edit FormPost</h1>
+
+    {{ include('form_back/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_form_back_index') }}">back to list</a>
+
+    {{ include('form_back/_delete_form.html.twig') }}
+{% endblock %}

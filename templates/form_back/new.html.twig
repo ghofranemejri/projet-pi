@@ -1,0 +1,15 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Créer un nouveau Post{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="mb-4">Créer un nouveau Post</h1>
+
+        {{ form_start(form) }}
+            {{ form_widget(form) }}
+        {{ form_end(form) }}
+
+        <a href="{{ path('app_form_back_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+    </div>
+{% endblock %}

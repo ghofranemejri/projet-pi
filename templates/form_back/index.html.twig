@@ -1,0 +1,169 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}FormPost Index{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">📋 FormPost Index</h1>
+
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{{ path('app_form_back_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Créer un nouveau post
+        </a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Commentaires</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form_post in form_posts %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ form_post.nom }}</td>
+                        <td>{{ form_post.date ? form_post.date|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                        <td>{{ form_post.description }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary comment-btn" data-id="{{ form_post.id }}">
+                                <i class="fas fa-comment"></i> ({{ form_post.reponses|length }})
+                            </button>
+                        </td>
+                        <td>
+                            <a href="{{ path('app_form_back_edit', {'id': form_post.id}) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <button class="btn btn-sm btn-danger delete-btn"
+                               data-url="{{ path('app_form_back_delete', {'id': form_post.id}) }}"
+                               data-token="{{ csrf_token('delete' ~ form_post.id) }}">
+                               <i class="fas fa-trash-alt"></i> Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                    
+                    <!-- Section des commentaires sous le tableau -->
+                    <tr id="comments-{{ form_post.id }}" class="comments-section" style="display: none;">
+                        <td colspan="6">
+                            <h6>Commentaires ({{ form_post.reponses|length }})</h6>
+                            <div class="comment-list">
+                                {% for reponse in form_post.reponses %}
+                                    <div class="comment bg-light p-2 rounded mb-2">{{ reponse.contenu }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Zone de saisie d'un nouveau commentaire -->
+                            <textarea class="form-control mb-2 comment-text" placeholder="Ajoutez un commentaire..."></textarea>
+                            <button class="btn btn-sm btn-primary add-comment" data-id="{{ form_post.id }}">Envoyer</button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Aucun enregistrement trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SweetAlert pour confirmation de suppression -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // 🔴 Gestion de la suppression avec AJAX
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            let url = this.getAttribute('data-url');
+            let token = this.getAttribute('data-token');
+            let row = this.closest('tr');
+
+            Swal.fire({
+                title: "Êtes-vous sûr ?",
+                text: "Cette action est irréversible !",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Oui, supprimer !"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams({ _token: token })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire("Supprimé !", "L'élément a été supprimé.", "success")
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire("Erreur", "Impossible de supprimer.", "error");
+                        }
+                    })
+                    .catch(() => Swal.fire("Erreur", "Une erreur est survenue.", "error"));
+                }
+            });
+        });
+    });
+
+    // 🔵 Afficher/Cacher la section des commentaires
+    document.querySelectorAll('.comment-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            let postId = this.getAttribute('data-id');
+            let commentRow = document.getElementById('comments-' + postId);
+            commentRow.style.display = commentRow.style.display === 'none' ? 'table-row' : 'none';
+        });
+    });
+
+    // 🟢 Ajouter un commentaire via AJAX
+    document.querySelectorAll('.add-comment').forEach(button => {
+        button.addEventListener('click', function() {
+            let postId = this.getAttribute('data-id');
+            let textarea = document.querySelector('#comments-' + postId + ' .comment-text');
+            let commentText = textarea.value.trim();
+
+            if (commentText === "") {
+                Swal.fire("Erreur", "Le commentaire ne peut pas être vide.", "error");
+                return;
+            }
+
+            fetch(`/form_post/${postId}/comment`, {  // 🔹 Assurez-vous que cette route existe dans Symfony
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ contenu: commentText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let commentList = document.querySelector(`#comments-${postId} .comment-list`);
+                    let commentDiv = document.createElement('div');
+                    commentDiv.classList.add('comment', 'bg-light', 'p-2', 'rounded', 'mb-2');
+                    commentDiv.textContent = commentText;
+                    commentList.appendChild(commentDiv);
+                    textarea.value = ''; // Reset textarea
+                } else {
+                    Swal.fire("Erreur", "Impossible d'ajouter le commentaire.", "error");
+                }
+            })
+            .catch(() => Swal.fire("Erreur", "Une erreur est survenue.", "error"));
+        });
+    });
+});
+</script>
+{% endblock %}

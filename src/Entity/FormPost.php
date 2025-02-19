@@ -22,7 +22,7 @@ class FormPost
     #[Assert\Length(min: 3, max: 50, minMessage: "Le nom doit avoir au moins 3 caractères.")]
     private ?string $nom = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
     #[Assert\NotBlank(message: "La date est requise.")]
     #[Assert\Type("\DateTimeInterface", message: "Le format de la date est invalide.")]
     private ?\DateTimeInterface $date = null;

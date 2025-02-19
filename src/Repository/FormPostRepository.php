@@ -15,6 +15,15 @@ class FormPostRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, FormPost::class);
     }
+// src/Repository/FormPostRepository.php
+   public function findAllWithReponses(): array
+   {
+    return $this->createQueryBuilder('f')
+        ->leftJoin('f.reponses', 'r') // Join with responses
+        ->addSelect('r') // Fetch responses
+        ->getQuery()
+        ->getResult();
+  }
 
     //    /**
     //     * @return FormPost[] Returns an array of FormPost objects
