@@ -21,6 +21,7 @@ final class RendezVousController extends AbstractController
             'rendez_vouses' => $rendezVousRepository->findAll(),
         ]);
     }
+    
 
     #[Route('/new', name: 'app_rendez_vous_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
