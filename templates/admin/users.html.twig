@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Gestion des utilisateurs</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Rôles</th>
+            <th>Actions</th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.roles|join(', ') }}</td>
+                <td>
+                    {% if 'ROLE_MEDECIN' not in user.roles %}
+                        <a href="{{ path('admin_user_promote', {'id': user.id, 'role': 'ROLE_MEDECIN'}) }}" class="btn btn-warning">Promote to Doctor</a>
+                    {% endif %}
+                    {% if 'ROLE_ADMIN' not in user.roles %}
+                        <a href="{{ path('admin_user_promote', {'id': user.id, 'role': 'ROLE_ADMIN'}) }}" class="btn btn-danger">Promote to Admin</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
