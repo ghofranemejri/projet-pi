@@ -87,8 +87,13 @@
           </ul>
           <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
         </nav>
+        <!-- Formulaire de recherche -->
+        <form class="d-flex ms-3" method="get" action="{{ path('app_form_post_search') }}">
+          <input class="form-control me-2" type="search" name="q" placeholder="Rechercher..." aria-label="Search" value="{{ query|default('') }}">
+          <button class="btn btn-outline-light" type="submit">🔍</button>
+        </form>
 
-        <a class="cta-btn d-none d-sm-block" href="{{path('app_form_post_new')}}">Forum</a>
+        <a class="cta-btn d-none d-sm-block" href="{{path('app_form_post_index')}}">Forum</a>
 
       </div>
 

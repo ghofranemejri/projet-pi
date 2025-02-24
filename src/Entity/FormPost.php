@@ -35,13 +35,17 @@ class FormPost
     /**
      * @var Collection<int, Reponse>
      */
-    #[ORM\OneToMany(targetEntity: Reponse::class, mappedBy: 'nom')]
+    #[ORM\OneToMany(targetEntity: Reponse::class, mappedBy: 'nom', cascade: ['remove'], orphanRemoval: true)]
     private Collection $reponses;
 
     public function __construct()
     {
         $this->reponses = new ArrayCollection();
+        $this->date = new \DateTime(); // Met la date actuelle par défaut
     }
+    
+
+ 
 
     public function getId(): ?int
     {

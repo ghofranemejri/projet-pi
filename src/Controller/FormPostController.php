@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\ReponseRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Entity\Reponse;
 
 #[Route('/form/post')]
 final class FormPostController extends AbstractController
@@ -133,4 +134,54 @@ final class FormPostController extends AbstractController
 
         return new JsonResponse(['success' => false], Response::HTTP_BAD_REQUEST);
     }
+    #[Route('/form_post/{id}/comment', name: 'app_form_post_comment', methods: ['POST'])]
+public function addComment(int $id, Request $request, EntityManagerInterface $entityManager, FormPostRepository $formPostRepository): JsonResponse
+{
+    // Vérifier si le post existe
+    $formPost = $formPostRepository->find($id);
+    if (!$formPost) {
+        return new JsonResponse(['success' => false, 'message' => 'Post introuvable.'], 404);
+    }
+
+    // Récupérer les données de la requête
+    $data = json_decode($request->getContent(), true);
+    if (!$data || !isset($data['contenu']) || empty(trim($data['contenu']))) {
+        return new JsonResponse(['success' => false, 'message' => 'Commentaire vide.'], 400);
+    }
+
+    // Créer le commentaire
+    $comment = new Reponse();
+    $comment->setContenu($data['contenu']);
+    $comment->setPost($formPost);
+    $comment->setDate(new \DateTime());
+
+    // Sauvegarde en base de données
+    $entityManager->persist($comment);
+    $entityManager->flush();
+
+    return new JsonResponse(['success' => true, 'message' => 'Commentaire ajouté avec succès !']);
 }
+// src/Controller/FormPostController.php
+
+#[Route('/recherche', name: 'app_form_post_search', methods: ['GET'])]
+public function search(Request $request, FormPostRepository $formPostRepository): Response
+{
+    $query = $request->query->get('q', '');
+
+    $formPosts = $formPostRepository->createQueryBuilder('p')
+        ->where('p.nom LIKE :query OR p.description LIKE :query')
+        ->setParameter('query', '%' . $query . '%')
+        ->getQuery()
+        ->getResult();
+
+    return $this->render('form_post/search.html.twig', [
+        'form_posts' => $formPosts,
+        'query' => $query,
+    ]);
+}
+
+
+
+    
+}
+

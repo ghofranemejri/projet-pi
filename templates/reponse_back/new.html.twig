@@ -2,14 +2,37 @@
 
 {% block title %}Créer une nouvelle Réponse{% endblock %}
 
-{% block body %}
+{% block content %}
     <div class="container mt-5">
-        <h1 class="mb-4">Créer une nouvelle Réponse</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h2 class="mb-0"><i class="fas fa-reply"></i> Ajouter une Réponse</h2>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
-        {{ form_start(form) }}
-            {{ form_widget(form) }}
-        {{ form_end(form) }}
+                    <div class="mb-3">
+                        {{ form_label(form.contenu, 'Votre Réponse :', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                        {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Écrivez votre réponse ici...'}}) }}
+                    </div>
 
-        <a href="{{ path('app_reponse_back_index') }}" class="btn btn-secondary mt-3">Retour à la liste</a>
+                    <div class="text-center mt-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{{ path('app_form_back_index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}

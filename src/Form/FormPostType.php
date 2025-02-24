@@ -29,7 +29,8 @@ class FormPostType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                 ],
-                'required' => true
+                'required' => false,
+                'empty_data' => null,
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
@@ -40,13 +41,13 @@ class FormPostType extends AbstractType
                     'placeholder' => 'Décrivez votre post'
                 ],
                 'required' => true
-            ])
-            ->add('save', SubmitType::class, [
+            ]);
+            /*->add('save', SubmitType::class, [
                 'label' => 'Enregistrer',
                 'attr' => [
                     'class' => 'btn btn-primary mt-3'
                 ]
-            ]);
+            ]);*/
     }
 
     public function configureOptions(OptionsResolver $resolver): void

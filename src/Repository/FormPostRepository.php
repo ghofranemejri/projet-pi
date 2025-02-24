@@ -24,6 +24,20 @@ class FormPostRepository extends ServiceEntityRepository
         ->getQuery()
         ->getResult();
   }
+  // src/Repository/FormPostRepository.php
+
+  public function searchByName(string $query): array
+{
+    return $this->createQueryBuilder('p')
+        ->andWhere('p.nom LIKE :query') // Recherche uniquement par nom
+        ->setParameter('query', '%' . $query . '%')
+        ->orderBy('p.date', 'DESC') // Trier par date
+        ->getQuery()
+        ->getResult();
+}
+
+  
+
 
     //    /**
     //     * @return FormPost[] Returns an array of FormPost objects

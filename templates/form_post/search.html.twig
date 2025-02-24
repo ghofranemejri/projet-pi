@@ -1,40 +1,34 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}FormPost Index{% endblock %}
+{% block title %}Résultats de la recherche{% endblock %}
 
 {% block body %}
 <div class="container mt-4">
-    <h1 class="text-center mb-4">📋 FormPost Index</h1>
-     {% set query = query|default('') %}
-     <!-- Ajout de la barre de recherche centrée -->
-    <div class="row justify-content-center mb-3">
-        <div class="col-md-6">
-            <form method="get" action="{{ path('app_form_post_search') }}" class="input-group">
-                <input type="text" class="form-control" name="q" placeholder="Rechercher un post..." value="{{ query }}">
-                <button class="btn btn-primary" type="submit">Rechercher</button>
-            </form>
-        </div>
-    </div>
+    <h1 class="text-center mb-4">🔍 Résultats de la recherche</h1>
 
     <div class="d-flex justify-content-between mb-3">
-        <a href="{{ path('app_form_post_new') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create New
+        <a href="{{ path('app_form_post_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour aux posts
         </a>
     </div>
+
     {% set query = query|default('') %}
 
-    
-
+    <!--<form method="get" action="{{ path('app_form_post_search') }}" class="mb-4">
+        <input type="text" name="q" class="form-control d-inline-block w-50" placeholder="Rechercher un post..." value="{{ query }}">
+        <button type="submit" class="btn btn-secondary">Rechercher</button>
+    </form>-->
 
     <div class="row">
         {% for form_post in form_posts %}
             <div class="col-md-8 offset-md-2 mb-4">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm border-0">
                     <div class="card-body">
-                        <h5 class="card-title">{{ form_post.nom }}</h5>
+                        <h5 class="card-title fw-bold">{{ form_post.nom }}</h5>
                         <h6 class="text-muted">Ajouté à la date : {{ form_post.date ? form_post.date|date('Y-m-d H:i:s') : 'N/A' }}</h6>
                         <p class="card-text">{{ form_post.description }}</p>
-                        <div class="d-flex">
+
+                        <div class="d-flex align-items-center">
                             <a href="{{ path('app_form_post_edit', {'id': form_post.id}) }}" class="text-warning me-3">
                                 <i class="fas fa-edit"></i>
                             </a>
@@ -47,7 +41,7 @@
                                 <i class="fas fa-comment"></i> (<span id="comment-count-{{ form_post.id }}">{{ form_post.reponses|length }}</span>)
                             </a>
                         </div>
-                        
+
                         <!-- Comment Section -->
                         <div class="comments-section mt-3" id="comments-{{ form_post.id }}" style="display: none;">
                             <h6>Commentaires (<span id="comment-count-section-{{ form_post.id }}">{{ form_post.reponses|length }}</span>)</h6>
@@ -59,7 +53,7 @@
                             <textarea class="form-control mb-2 comment-text" placeholder="Ajoutez un commentaire..."></textarea>
                             <button class="btn btn-sm btn-primary add-comment" 
                                     data-id="{{ form_post.id }}"
-                                    data-url="{{ path('app_reponse_new' )}}"
+                                    data-url="{{ path('app_reponse_new') }}"
                                     data-token="{{ csrf_token('add_comment' ~ form_post.id) }}">
                                 Ajouter un commentaire
                             </button>
@@ -69,7 +63,7 @@
             </div>
         {% else %}
             <div class="col-md-8 offset-md-2">
-                <p class="text-muted text-center">Aucun enregistrement trouvé.</p>
+                <p class="text-muted text-center">Aucun post trouvé pour "{{ query }}".</p>
             </div>
         {% endfor %}
     </div>
@@ -79,47 +73,6 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Deleting a Post
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function (e) {
-            e.preventDefault();
-            let url = this.getAttribute('data-url');
-            let token = this.getAttribute('data-token');
-
-            Swal.fire({
-                title: "Êtes-vous sûr ?",
-                text: "Cette action est irréversible !",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Oui, supprimer !"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(url, {
-                        method: "POST",
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest",
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: new URLSearchParams({ _token: token })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire("Supprimé !", "L'élément a été supprimé.", "success")
-                                .then(() => location.reload());
-                        } else {
-                            Swal.fire("Erreur", "Impossible de supprimer.", "error");
-                        }
-                    })
-                    .catch(() => Swal.fire("Erreur", "Une erreur est survenue.", "error"));
-                }
-            });
-        });
-    });
-
-    // Toggle Comment Section
     document.querySelectorAll('.comment-btn').forEach(button => {
         button.addEventListener('click', function (e) {
             e.preventDefault();
@@ -129,7 +82,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Adding a Comment
     document.querySelectorAll('.add-comment').forEach(button => {
         button.addEventListener('click', function () {
             let postId = this.getAttribute('data-id');
@@ -147,7 +99,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ contenu: commentText, formPostId: postId, _token: token })
-
             })
             .then(response => response.json())
             .then(data => {
@@ -174,14 +125,5 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".add-comment").forEach(button => {
-            button.addEventListener("click", function () {
-                window.location.href = "{{ path('app_reponse_new') }}";
-            });
-        });
-    });
-</script>
 
-{% endblock %} 
+{% endblock %}

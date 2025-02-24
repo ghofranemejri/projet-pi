@@ -37,7 +37,7 @@ final class ReponseController extends AbstractController
             $entityManager->persist($reponse);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_reponse_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_form_post_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('reponse/new.html.twig', [
@@ -82,24 +82,16 @@ final class ReponseController extends AbstractController
 
         return $this->redirectToRoute('app_reponse_index', [], Response::HTTP_SEE_OTHER);
     }
-}
-#[Route('/reponse_back')]
-final class Reponse_backController extends AbstractController
-{
-    #[Route(name: 'app_reponse_back_index', methods: ['GET'])]
-    public function index(ReponseRepository $reponseRepository): Response
+    #[Route('/back',name: 'app_reponse_back_index', methods: ['GET'])]
+    public function backindex(ReponseRepository $reponseRepository): Response
     {
         return $this->render('reponse_back/index.html.twig', [
             'reponses' => $reponseRepository->findAll(),
         ]);
     }
-    
 
-
-
-
-    #[Route('/reponse/new', name: 'app_reponse_new', methods: ['POST'])]
-public function new(Request $request, EntityManagerInterface $entityManager, FormPostRepository $formPostRepository): JsonResponse
+#[Route('/reponse/new', name: 'app_reponse_back_new', methods: ['POST'])]
+public function newReponse(Request $request, EntityManagerInterface $entityManager, FormPostRepository $formPostRepository): JsonResponse
 {
     $data = json_decode($request->getContent(), true);
 
@@ -127,10 +119,28 @@ public function new(Request $request, EntityManagerInterface $entityManager, For
     return new JsonResponse(['success' => true, 'message' => 'Commentaire ajouté avec succès']);
 }
 
-    
+#[Route('/back/new', name: 'app_reponse_back_new', methods: ['GET', 'POST'])]
+public function newback(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $reponse = new Reponse();
+    $form = $this->createForm(ReponseType::class, $reponse);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $entityManager->persist($reponse);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('app_form_back_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    return $this->render('reponse_back/new.html.twig', [
+        'reponse' => $reponse,
+        'form' => $form,
+    ]);
+}
 
     #[Route('/{id}', name: 'app_reponse_back_show', methods: ['GET'])]
-    public function show(Reponse $reponse): Response
+    public function showBack(Reponse $reponse): Response
     {
         return $this->render('reponse_back/show.html.twig', [
             'reponse_back' => $reponse,
@@ -138,7 +148,7 @@ public function new(Request $request, EntityManagerInterface $entityManager, For
     }
 
     #[Route('/{id}/edit', name: 'app_reponse_back_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Reponse $reponse, EntityManagerInterface $entityManager): Response
+    public function editBack(Request $request, Reponse $reponse, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(ReponseType::class, $reponse);
         $form->handleRequest($request);
@@ -156,9 +166,9 @@ public function new(Request $request, EntityManagerInterface $entityManager, For
     }
 
     #[Route('/{id}', name: 'app_reponse_back_delete', methods: ['POST'])]
-    public function delete(Request $request, Reponse $reponse, EntityManagerInterface $entityManager): Response
+    public function deleteBack(Request $request, Reponse $reponse, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$reponse->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$reponse->getId(), $request->get('_token'))) {
             $entityManager->remove($reponse);
             $entityManager->flush();
         }
