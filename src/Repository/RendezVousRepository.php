@@ -16,28 +16,17 @@ class RendezVousRepository extends ServiceEntityRepository
         parent::__construct($registry, RendezVous::class);
     }
 
-    //    /**
-    //     * @return RendezVous[] Returns an array of RendezVous objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('r.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    /**
+     * Recherche les rendez-vous en fonction du nom du patient, du médecin ou du motif.
+     */
+    public function searchRendezVous(string $query): array
+{
+    return $this->createQueryBuilder('r')
+        ->join('r.Patient', 'p')
+        ->andWhere('p.nom LIKE :query')
+        ->setParameter('query', '%' . $query . '%')
+        ->getQuery()
+        ->getResult();
+}
 
-    //    public function findOneBySomeField($value): ?RendezVous
-    //    {
-    //        return $this->createQueryBuilder('r')
-    //            ->andWhere('r.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

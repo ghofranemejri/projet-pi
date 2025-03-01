@@ -9,19 +9,97 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
+use App\Service\PdfGenerator;
 
 #[Route('/rendez')]
 final class RendezVousController extends AbstractController
 {
-    #[Route(name: 'app_rendez_vous_index', methods: ['GET'])]
-    public function index(RendezVousRepository $rendezVousRepository): Response
+    #[Route('/back', name: 'app_rendez_vous_index_back', methods: ['GET'])]
+    public function backindex(Request $request, RendezVousRepository $rendezVousRepository): Response
     {
-        return $this->render('rendez_vous/index.html.twig', [
-            'rendez_vouses' => $rendezVousRepository->findAll(),
+        $query = $request->query->get('q', '');
+        $rendezVouses = $query
+            ? $rendezVousRepository->searchRendezVous($query)
+            : $rendezVousRepository->findAll();
+
+        return $this->render('rendez_vous_back/index.html.twig', [
+            'rendez_vouses' => $rendezVouses,
+            'query' => $query,
         ]);
     }
-    
+
+    #[Route('/back/new', name: 'app_rendez_vous_new_back', methods: ['GET', 'POST'])]
+    public function backnew(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $rendezVou = new RendezVous();
+        $form = $this->createForm(RendezVousType::class, $rendezVou);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($rendezVou);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_rendez_vous_index_back');
+        }
+
+        return $this->render('rendez_vous_back/new.html.twig', [
+            'rendez_vou' => $rendezVou,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/back/{id}/show', name: 'app_rendez_vous_show_back', methods: ['GET'])]
+    public function backshow(RendezVous $rendezVou): Response
+    {
+        return $this->render('rendez_vous_back/show.html.twig', [
+            'rendez_vou' => $rendezVou,
+        ]);
+    }
+
+    #[Route('/back/{id}/edit', name: 'app_rendez_vous_edit_back', methods: ['GET', 'POST'])]
+    public function backedit(Request $request, RendezVous $rendezVou, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(RendezVousType::class, $rendezVou);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_rendez_vous_index_back');
+        }
+
+        return $this->render('rendez_vous_back/edit.html.twig', [
+            'rendez_vou' => $rendezVou,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/back/{id}/delete', name: 'app_rendez_vous_delete_back', methods: ['POST'])]
+    public function backdelete(Request $request, RendezVous $rendezVou, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$rendezVou->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($rendezVou);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('app_rendez_vous_index_back');
+    }
+
+    #[Route('', name: 'app_rendez_vous_index', methods: ['GET'])]
+    public function index(Request $request, RendezVousRepository $rendezVousRepository): Response
+    {
+        $query = $request->query->get('q', '');
+
+        $rendezVouses = $query
+            ? $rendezVousRepository->searchRendezVous($query)
+            : $rendezVousRepository->findAll();
+
+        return $this->render('rendez_vous/index.html.twig', [
+            'rendez_vouses' => $rendezVouses,
+            'query' => $query,
+        ]);
+    }
 
     #[Route('/new', name: 'app_rendez_vous_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
@@ -34,7 +112,7 @@ final class RendezVousController extends AbstractController
             $entityManager->persist($rendezVou);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_rendez_vous_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_rendez_vous_index');
         }
 
         return $this->render('rendez_vous/new.html.twig', [
@@ -60,7 +138,7 @@ final class RendezVousController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_rendez_vous_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_rendez_vous_index');
         }
 
         return $this->render('rendez_vous/edit.html.twig', [
@@ -72,77 +150,52 @@ final class RendezVousController extends AbstractController
     #[Route('/{id}/delete', name: 'app_rendez_vous_delete', methods: ['POST'])]
     public function delete(Request $request, RendezVous $rendezVou, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$rendezVou->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$rendezVou->getId(), $request->request->get('_token'))) {
             $entityManager->remove($rendezVou);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_rendez_vous_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_rendez_vous_index');
     }
 
-    #[Route('/back',name: 'app_rendez_vous_index_back', methods: ['GET'])]
-    public function backindex(RendezVousRepository $rendezVousRepository): Response
+    #[Route('/back/rendez-vous/recherche', name: 'app_rendez_vous_search', methods: ['GET'])]
+    public function recherche(Request $request, RendezVousRepository $repository): Response
     {
+        $query = $request->query->get('q', '');
+        $rendez_vouses = $repository->searchRendezVous($query); // Recherche des rendez-vous selon le nom ou critère
+
+        if ($request->isXmlHttpRequest()) { // Vérifie si la requête est AJAX
+            return $this->render('rendez_vous_back/search.html.twig', [
+                'rendez_vouses' => $rendez_vouses,
+                'query' => $query
+            ]);
+        }
+
         return $this->render('rendez_vous_back/index.html.twig', [
-            'rendez_vouses' => $rendezVousRepository->findAll(),
-        ]);
-    }
-    
-
-    #[Route('/back/new', name: 'app_rendez_vous_new_back', methods: ['GET', 'POST'])]
-    public function backnew(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $rendezVou = new RendezVous();
-        $form = $this->createForm(RendezVousType::class, $rendezVou);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($rendezVou);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_rendez_vous_index_back', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('rendez_vous_back/new.html.twig', [
-            'rendez_vou' => $rendezVou,
-            'form' => $form,
+            'rendez_vouses' => $rendez_vouses,
+            'query' => $query,
         ]);
     }
 
-    #[Route('/back/{id}/show', name: 'app_rendez_vous_show_back', methods: ['GET'])]
-    public function backshow(RendezVous $rendezVou): Response
+    // Correction du PDF : La méthode GET est plus appropriée pour générer un PDF
+    #[Route('/back/rendez_vous/pdf', name: 'app_rendez_vous_pdf', methods: ['GET'])]
+    public function generatePdf(RendezVousRepository $rendezVousRepository, PdfGenerator $pdfGenerator): Response
     {
-        return $this->render('rendez_vous_back/show.html.twig', [
-            'rendez_vou' => $rendezVou,
+        // Récupérer tous les rendez-vous
+        $rendezVouses = $rendezVousRepository->findAll();
+
+        // Générer le contenu HTML pour le PDF
+        $htmlContent = $this->renderView('rendez_vous_back/pdf.html.twig', [
+            'rendez_vouses' => $rendezVouses,
         ]);
-    }
 
-    #[Route('back/{id}/edit', name: 'app_rendez_vous_edit_back', methods: ['GET', 'POST'])]
-    public function backedit(Request $request, RendezVous $rendezVou, EntityManagerInterface $entityManager): Response
-    {
-        $form = $this->createForm(RendezVousType::class, $rendezVou);
-        $form->handleRequest($request);
+        // Utiliser le service PdfGenerator pour générer le PDF
+        $pdf = $pdfGenerator->generatePdf($htmlContent);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_rendez_vous_index_back', [], Response::HTTP_SEE_OTHER);
-        }
-
-        return $this->render('rendez_vous_back/edit.html.twig', [
-            'rendez_vou' => $rendezVou,
-            'form' => $form,
+        // Retourner le PDF comme une réponse HTTP
+        return new Response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="rendezvous_list.pdf"',
         ]);
-    }
-
-    #[Route('back/{id}/delete', name: 'app_rendez_vous_delete_back', methods: ['POST'])]
-    public function backdelete(Request $request, RendezVous $rendezVou, EntityManagerInterface $entityManager): Response
-    {
-        if ($this->isCsrfTokenValid('delete'.$rendezVou->getId(), $request->getPayload()->getString('_token'))) {
-            $entityManager->remove($rendezVou);
-            $entityManager->flush();
-        }
-
-        return $this->redirectToRoute('app_rendez_vous_index_back', [], Response::HTTP_SEE_OTHER);
     }
 }
