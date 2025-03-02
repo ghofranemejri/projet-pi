@@ -13,25 +13,43 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\ReponseRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\Reponse;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Bundle\SecurityBundle\Security;
+use App\Entity\User;
+
 
 #[Route('/form/post')]
 final class FormPostController extends AbstractController
 {
     #[Route('/front', name: 'app_form_post_index', methods: ['GET'])]
-    public function index(FormPostRepository $formPostRepository, ReponseRepository $reponseRepository): Response
+    public function index(FormPostRepository $formPostRepository, PaginatorInterface $paginator, Request $request): Response
     {
+        $query = $formPostRepository->findAll(); // Récupérer tous les posts
+    
+        $pagination = $paginator->paginate(
+            $query, // Requête
+            $request->query->getInt('page', 1), // Page actuelle (par défaut : 1)
+            5 // Nombre d'éléments par page
+        );
+    
         return $this->render('form_post/index.html.twig', [
-            'form_posts' => $formPostRepository->findAll(),
-            'reponses' => $reponseRepository->findAll(),
+            'pagination' => $pagination,
         ]);
     }
 
     #[Route('/back', name: 'app_form_back_index', methods: ['GET'])]
-    public function backIndex(FormPostRepository $formPostRepository, ReponseRepository $reponseRepository): Response
+    public function backindex(FormPostRepository $formPostRepository, PaginatorInterface $paginator, Request $request): Response
     {
+        $query = $formPostRepository->findAll(); // Récupérer tous les posts
+    
+        $pagination = $paginator->paginate(
+            $query, // Requête
+            $request->query->getInt('page', 1), // Page actuelle (par défaut : 1)
+            5 // Nombre d'éléments par page
+        );
+    
         return $this->render('form_back/index.html.twig', [
-            'form_posts' => $formPostRepository->findAll(),
-            'reponses' => $reponseRepository->findAll(),
+            'pagination' => $pagination,
         ]);
     }
 
@@ -161,7 +179,7 @@ public function addComment(int $id, Request $request, EntityManagerInterface $en
 
     return new JsonResponse(['success' => true, 'message' => 'Commentaire ajouté avec succès !']);
 }
-// src/Controller/FormPostController.php
+
 
 #[Route('/recherche', name: 'app_form_post_search', methods: ['GET'])]
 public function search(Request $request, FormPostRepository $formPostRepository): Response
@@ -174,6 +192,13 @@ public function search(Request $request, FormPostRepository $formPostRepository)
         ->getQuery()
         ->getResult();
 
+    // Si c'est une requête AJAX, renvoyer uniquement les résultats
+    if ($request->isXmlHttpRequest()) {
+        return $this->render('form_post/index.html.twig', [
+            'form_posts' => $formPosts,
+        ]);
+    }
+
     return $this->render('form_post/search.html.twig', [
         'form_posts' => $formPosts,
         'query' => $query,
@@ -181,6 +206,64 @@ public function search(Request $request, FormPostRepository $formPostRepository)
 }
 
 
+#[Route('/admin/form/search', name: 'app_form_back_search', methods: ['GET'])]
+public function searchback(Request $request, FormPostRepository $formPostRepository): JsonResponse
+{
+    $search = $request->query->get('search', '');
+    $sort = $request->query->get('sort', '');
+
+    $queryBuilder = $formPostRepository->createQueryBuilder('fp');
+
+    if ($search) {
+        $queryBuilder
+            ->andWhere('fp.nom LIKE :search OR fp.description LIKE :search')
+            ->setParameter('search', '%' . $search . '%');
+    }
+
+    if ($sort === 'name') {
+        $queryBuilder->orderBy('fp.nom', 'ASC');
+    } elseif ($sort === 'date') {
+        $queryBuilder->orderBy('fp.date', 'DESC');
+    } elseif ($sort === 'comments') {
+        $queryBuilder->leftJoin('fp.reponses', 'r')
+                     ->groupBy('fp.id')
+                     ->orderBy('COUNT(r.id)', 'DESC');
+    }
+
+    $formPosts = $queryBuilder->getQuery()->getResult();
+
+    $data = [];
+    foreach ($formPosts as $post) {
+        $data[] = [
+            'id' => $post->getId(),
+            'nom' => $post->getNom(),
+            'date' => $post->getDate() ? $post->getDate()->format('Y-m-d H:i:s') : null,
+            'description' => $post->getDescription(),
+            'reponses' => array_map(fn($r) => ['contenu' => $r->getContenu()], $post->getReponses()->toArray()),
+        ];
+    }
+
+    return new JsonResponse($data);
+}
+#[Route('/{id}/react', name: 'app_form_post_react', methods: ['POST'])]
+public function likeDislike(FormPost $formPost, EntityManagerInterface $entityManager, Request $request): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
+    $reaction = $data['reaction'] ?? null;
+
+    if ($reaction === 'like') {
+        $formPost->addLike();
+    } elseif ($reaction === 'dislike') {
+        $formPost->addDislike();
+    }
+
+    $entityManager->flush();
+
+    return new JsonResponse([
+        'likes' => $formPost->getLikes(),
+        'dislikes' => $formPost->getDislikes(),
+    ]);
+}
 
     
 }

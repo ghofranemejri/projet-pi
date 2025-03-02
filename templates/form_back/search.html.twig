@@ -35,7 +35,7 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="posts-body">
                 {% for form_post in pagination %}
                     <tr class="post-row">
                         <td>{{ loop.index }}</td>
@@ -76,74 +76,43 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Suppression avec SweetAlert
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            let url = this.getAttribute('data-url');
-            let token = this.getAttribute('data-token');
+    let searchInput = document.getElementById('search');
+    let sortSelect = document.getElementById('sort');
+    let tableBody = document.getElementById('posts-body');
+    let rows = Array.from(tableBody.querySelectorAll('.post-row'));
 
-            Swal.fire({
-                title: "Êtes-vous sûr ?",
-                text: "Cette action est irréversible !",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Oui, supprimer !"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch(url, {
-                        method: "POST",
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest",
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: new URLSearchParams({ _token: token })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire("Supprimé !", "L'élément a été supprimé.", "success")
-                                .then(() => location.reload());
-                        } else {
-                            Swal.fire("Erreur", "Impossible de supprimer.", "error");
-                        }
-                    })
-                    .catch(() => Swal.fire("Erreur", "Une erreur est survenue.", "error"));
-                }
-            });
-        });
-    });
+    function filterAndSort() {
+        let searchQuery = searchInput.value.toLowerCase();
+        let sortBy = sortSelect.value;
 
-    // Tri et Filtrage
-    document.getElementById('search').addEventListener('keyup', function() {
-        let filter = this.value.toLowerCase();
-        document.querySelectorAll('.post-row').forEach(row => {
+        let filteredRows = rows.filter(row => {
             let name = row.querySelector('.post-name').textContent.toLowerCase();
             let description = row.querySelector('.post-description').textContent.toLowerCase();
-            row.style.display = (name.includes(filter) || description.includes(filter)) ? '' : 'none';
+            return name.includes(searchQuery) || description.includes(searchQuery);
         });
-    });
 
-    document.getElementById('sort').addEventListener('change', function() {
-        let rows = Array.from(document.querySelectorAll('.post-row'));
-        let sortBy = this.value;
-        
-        rows.sort((a, b) => {
-            if (sortBy === 'name') {
+        if (sortBy === 'name') {
+            filteredRows.sort((a, b) => {
                 return a.querySelector('.post-name').textContent.localeCompare(b.querySelector('.post-name').textContent);
-            } else if (sortBy === 'date') {
-                return new Date(b.querySelector('.post-date').textContent) - new Date(a.querySelector('.post-date').textContent);
-            } else if (sortBy === 'comments') {
-                return b.querySelector('.post-comments').getAttribute('data-count') - a.querySelector('.post-comments').getAttribute('data-count');
-            }
-        });
+            });
+        } else if (sortBy === 'date') {
+            filteredRows.sort((a, b) => {
+                let dateA = new Date(a.querySelector('.post-date').textContent || '1970-01-01');
+                let dateB = new Date(b.querySelector('.post-date').textContent || '1970-01-01');
+                return dateB - dateA;
+            });
+        } else if (sortBy === 'comments') {
+            filteredRows.sort((a, b) => {
+                return b.querySelector('.post-comments').dataset.count - a.querySelector('.post-comments').dataset.count;
+            });
+        }
 
-        let tbody = document.querySelector('#posts-table tbody');
-        tbody.innerHTML = '';
-        rows.forEach(row => tbody.appendChild(row));
-    });
+        tableBody.innerHTML = "";
+        filteredRows.forEach(row => tableBody.appendChild(row));
+    }
+
+    searchInput.addEventListener('keyup', filterAndSort);
+    sortSelect.addEventListener('change', filterAndSort);
 });
 </script>
 {% endblock %}

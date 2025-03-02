@@ -10,10 +10,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use App\Repository\FormPostRepository;
 
 #[Route('/reponse')]
 final class ReponseController extends AbstractController
 {
+    private FormPostRepository $formPostRepository;
+
+
     #[Route(name: 'app_reponse_index', methods: ['GET'])]
     public function index(ReponseRepository $reponseRepository): Response
     {
@@ -22,7 +26,6 @@ final class ReponseController extends AbstractController
         ]);
     }
     
-
 
 
 
@@ -45,6 +48,7 @@ final class ReponseController extends AbstractController
             'form' => $form,
         ]);
     }
+    
 
     #[Route('/{id}', name: 'app_reponse_show', methods: ['GET'])]
     public function show(Reponse $reponse): Response

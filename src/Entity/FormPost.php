@@ -32,6 +32,12 @@ class FormPost
     #[Assert\Length(max: 500, maxMessage: "La description ne peut pas dépasser 500 caractères.")]
     private ?string $description = null;
 
+    #[ORM\Column(type: 'integer')]
+private int $likes = 0;
+
+#[ORM\Column(type: 'integer')]
+private int $dislikes = 0;
+
     /**
      * @var Collection<int, Reponse>
      */
@@ -41,11 +47,10 @@ class FormPost
     public function __construct()
     {
         $this->reponses = new ArrayCollection();
+        $this->likes = new ArrayCollection();
+        $this->dislikes = new ArrayCollection();
         $this->date = new \DateTime(); // Met la date actuelle par défaut
     }
-    
-
- 
 
     public function getId(): ?int
     {
@@ -60,7 +65,6 @@ class FormPost
     public function setNom(string $nom): static
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -72,7 +76,6 @@ class FormPost
     public function setDate(\DateTimeInterface $date): static
     {
         $this->date = $date;
-
         return $this;
     }
 
@@ -84,7 +87,6 @@ class FormPost
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -102,7 +104,6 @@ class FormPost
             $this->reponses->add($reponse);
             $reponse->setNom($this);
         }
-
         return $this;
     }
 
@@ -114,7 +115,27 @@ class FormPost
                 $reponse->setNom(null);
             }
         }
-
         return $this;
     }
+
+    public function getLikes(): int
+{
+    return $this->likes;
+}
+
+public function getDislikes(): int
+{
+    return $this->dislikes;
+}
+
+public function addLike(): void
+{
+    $this->likes++;
+}
+
+public function addDislike(): void
+{
+    $this->dislikes++;
+}
+
 }

@@ -33,16 +33,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
-    /**
-     * @var Collection<int, Share>
-     */
-    #[ORM\OneToMany(targetEntity: Share::class, mappedBy: 'user')]
-    private Collection $shares;
-
-    public function __construct()
-    {
-        $this->shares = new ArrayCollection();
-    }
+    
 
     public function getId(): ?int
     {
@@ -119,33 +110,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // $this->plainPassword = null;
     }
 
-    /**
-     * @return Collection<int, Share>
-     */
-    public function getShares(): Collection
-    {
-        return $this->shares;
-    }
-
-    public function addShare(Share $share): static
-    {
-        if (!$this->shares->contains($share)) {
-            $this->shares->add($share);
-            $share->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeShare(Share $share): static
-    {
-        if ($this->shares->removeElement($share)) {
-            // set the owning side to null (unless already changed)
-            if ($share->getUser() === $this) {
-                $share->setUser(null);
-            }
-        }
-
-        return $this;
-    }
+    
 }

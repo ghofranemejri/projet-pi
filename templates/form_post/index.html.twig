@@ -6,13 +6,21 @@
 <div class="container mt-4">
     <h1 class="text-center mb-4">📋 FormPost Index</h1>
      {% set query = query|default('') %}
-     <!-- Ajout de la barre de recherche centrée -->
+
+    <!-- Search Bar (Real-time filtering) -->
     <div class="row justify-content-center mb-3">
         <div class="col-md-6">
-            <form method="get" action="{{ path('app_form_post_search') }}" class="input-group">
-                <input type="text" class="form-control" name="q" placeholder="Rechercher un post..." value="{{ query }}">
-                <button class="btn btn-primary" type="submit">Rechercher</button>
-            </form>
+            <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un post..." value="{{ query }}">
+        </div>
+    </div>
+     <!-- Sorting Dropdown -->
+    <div class="row justify-content-center mb-3">
+        <div class="col-md-6">
+            <select id="sortSelect" class="form-control">
+                <option value="default">Trier par</option>
+                <option value="name">Nom</option>
+                <option value="date">Date</option>
+            </select>
         </div>
     </div>
 
@@ -21,14 +29,12 @@
             <i class="fas fa-plus"></i> Create New
         </a>
     </div>
-    {% set query = query|default('') %}
 
-    
-
-
-    <div class="row">
-        {% for form_post in form_posts %}
-            <div class="col-md-8 offset-md-2 mb-4">
+    <div class="row" id="postsContainer">
+        {% for form_post in pagination %}
+            <div class="col-md-8 offset-md-2 mb-4 post-card" 
+                 data-name="{{ form_post.nom|lower }}" 
+                 data-description="{{ form_post.description|lower }}">
                 <div class="card shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">{{ form_post.nom }}</h5>
@@ -47,7 +53,13 @@
                                 <i class="fas fa-comment"></i> (<span id="comment-count-{{ form_post.id }}">{{ form_post.reponses|length }}</span>)
                             </a>
                         </div>
-                        
+                        <button class="like-btn" data-id="{{ form_post.id }}">
+                        👍 <span class="like-count">{{ form_post.likes|length }}</span>
+                        </button>
+
+                        <button class="dislike-btn" data-id="{{ form_post.id }}">
+                        👎 <span class="dislike-count">{{ form_post.dislikes|length }}</span>
+                        </button>
                         <!-- Comment Section -->
                         <div class="comments-section mt-3" id="comments-{{ form_post.id }}" style="display: none;">
                             <h6>Commentaires (<span id="comment-count-section-{{ form_post.id }}">{{ form_post.reponses|length }}</span>)</h6>
@@ -57,12 +69,10 @@
                                 {% endfor %}
                             </div>
                             <textarea class="form-control mb-2 comment-text" placeholder="Ajoutez un commentaire..."></textarea>
-                            <button class="btn btn-sm btn-primary add-comment" 
-                                    data-id="{{ form_post.id }}"
-                                    data-url="{{ path('app_reponse_new' )}}"
-                                    data-token="{{ csrf_token('add_comment' ~ form_post.id) }}">
-                                Ajouter un commentaire
-                            </button>
+                            <a href="{{ path('app_reponse_new', {'formPostId': form_post.id}) }}" class="btn btn-sm btn-primary">
+    Ajouter un commentaire
+</a>
+
                         </div>
                     </div>
                 </div>
@@ -74,12 +84,16 @@
         {% endfor %}
     </div>
 </div>
+<!-- Pagination -->
+<div class="d-flex justify-content-center mt-4">
+    {{ knp_pagination_render(pagination) }}
+</div>
 
 <!-- SweetAlert for delete confirmation -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    // Deleting a Post
+    // DELETE POST CONFIRMATION
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', function (e) {
             e.preventDefault();
@@ -119,7 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Toggle Comment Section
+    // TOGGLE COMMENT SECTION
     document.querySelectorAll('.comment-btn').forEach(button => {
         button.addEventListener('click', function (e) {
             e.preventDefault();
@@ -128,8 +142,8 @@ document.addEventListener("DOMContentLoaded", function () {
             commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
         });
     });
-
-    // Adding a Comment
+    
+    // ADD COMMENT
     document.querySelectorAll('.add-comment').forEach(button => {
         button.addEventListener('click', function () {
             let postId = this.getAttribute('data-id');
@@ -172,16 +186,63 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(() => Swal.fire("Erreur", "Une erreur est survenue.", "error"));
         });
     });
-});
-</script>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        document.querySelectorAll(".add-comment").forEach(button => {
-            button.addEventListener("click", function () {
-                window.location.href = "{{ path('app_reponse_new') }}";
-            });
+
+    // REAL-TIME SEARCH FILTER
+    const searchInput = document.getElementById("searchInput");
+    const posts = document.querySelectorAll(".post-card");
+
+    searchInput.addEventListener("input", function () {
+        let query = searchInput.value.toLowerCase();
+
+        posts.forEach(post => {
+            let name = post.getAttribute("data-name");
+            let description = post.getAttribute("data-description");
+
+            if (name.includes(query) || description.includes(query)) {
+                post.style.display = "block"; // Show post
+            } else {
+                post.style.display = "none"; // Hide post
+            }
         });
     });
+    // SORTING FUNCTIONALITY
+    sortSelect.addEventListener("change", function () {
+        let sortBy = sortSelect.value;
+        let sortedPosts = Array.from(posts);
+
+        if (sortBy === "name") {
+            sortedPosts.sort((a, b) => a.getAttribute("data-name").localeCompare(b.getAttribute("data-name")));
+        } else if (sortBy === "date") {
+            sortedPosts.sort((a, b) => new Date(b.getAttribute("data-date")) - new Date(a.getAttribute("data-date")));
+        }
+
+        sortedPosts.forEach(post => postsContainer.appendChild(post));
+    });
+});
+
+</script>
+<script>
+document.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
+    button.addEventListener('click', function () {
+        const postId = this.getAttribute('data-id');
+        const reaction = this.classList.contains('like-btn') ? 'like' : 'dislike';
+
+        const url = `/form/post/${postId}/react`;
+        console.log("Requesting:", url);
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reaction })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector(`.like-btn[data-id='${postId}'] .like-count`).innerText = data.likes;
+            document.querySelector(`.dislike-btn[data-id='${postId}'] .dislike-count`).innerText = data.dislikes;
+        });
+    });
+});
+
 </script>
 
-{% endblock %} 
+{% endblock %}
