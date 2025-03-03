@@ -43,10 +43,22 @@
                         <td class="post-date">{{ form_post.date ? form_post.date|date('Y-m-d H:i:s') : 'N/A' }}</td>
                         <td class="post-description">{{ form_post.description }}</td>
                         <td class="post-comments" data-count="{{ form_post.reponses|length }}">
-                            <button class="btn btn-sm btn-secondary comment-btn" data-id="{{ form_post.id }}">
-                                <i class="fas fa-comment"></i> ({{ form_post.reponses|length }})
-                            </button>
-                        </td>
+                        <button class="btn btn-sm btn-secondary comment-btn" data-id="{{ form_post.id }}">
+                        <i class="fas fa-comment"></i> ({{ form_post.reponses|length }})
+                        </button>   
+                       <!-- Comment Section -->
+                        <div class="comments-section mt-3" id="comments-{{ form_post.id }}" style="display: none;">
+                            <h6>Commentaires (<span id="comment-count-section-{{ form_post.id }}">{{ form_post.reponses|length }}</span>)</h6>
+                            <div class="comments-list" id="comments-list-{{ form_post.id }}">
+                                {% for reponse in form_post.reponses %}
+                                    <div class="comment bg-light p-2 rounded mb-2">{{ reponse.contenu }}</div>
+                                {% endfor %}
+                            </div>
+                            <textarea class="form-control mb-2 comment-text" placeholder="Ajoutez un commentaire..."></textarea>
+                            <a href="{{ path('app_reponse_back_new', {'formPostId': form_post.id}) }}" class="btn btn-sm btn-primary">
+                            Ajouter un commentaire
+                            </a>   
+           
                         <td>
                             <a href="{{ path('app_form_back_edit', {'id': form_post.id}) }}" class="btn btn-warning btn-sm">
                                 <i class="fas fa-edit"></i> Modifier
@@ -68,11 +80,36 @@
     </div>
 
     <!-- Pagination placée en dehors de la boucle -->
-    <div class="d-flex justify-content-center mt-4">
-        {{ knp_pagination_render(pagination) }}
-    </div>
+   <!-- Pagination -->
+<div class="d-flex justify-content-center mt-4">
+    {{ knp_pagination_render(pagination) }}
 </div>
 
+
+       
+
+<div class="text-center mt-4">
+    <button id="toggleStats" class="btn btn-info">
+        📊 Voir les statistiques
+    </button>
+</div>
+<div class="mt-5" id="statsContainer" style="display: none;">
+    <h2 class="text-center">📊 Statistiques des commentaires</h2>
+    <canvas id="commentsChart"></canvas>
+</div>
+
+<script>
+// TOGGLE COMMENT SECTION
+    document.querySelectorAll('.comment-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            let postId = this.getAttribute('data-id');
+            let commentSection = document.getElementById('comments-' + postId);
+            commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+    
+</script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -146,4 +183,71 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let chartInstance = null; // Pour stocker le graphique
+
+    document.getElementById("toggleStats").addEventListener("click", function () {
+        let statsContainer = document.getElementById("statsContainer");
+
+        if (statsContainer.style.display === "none") {
+            statsContainer.style.display = "block";
+            generateChart();
+            this.textContent = "❌ Masquer les statistiques";
+        } else {
+            statsContainer.style.display = "none";
+            if (chartInstance) {
+                chartInstance.destroy(); // Détruire le graphique si on masque
+            }
+            this.textContent = "📊 Voir les statistiques";
+        }
+    });
+
+    function generateChart() {
+        let postNames = [];
+        let commentCounts = [];
+
+        document.querySelectorAll('.post-row').forEach(row => {
+            let name = row.querySelector('.post-name').textContent;
+            let commentCount = row.querySelector('.post-comments').getAttribute('data-count');
+
+            postNames.push(name);
+            commentCounts.push(parseInt(commentCount));
+        });
+
+        const ctx = document.getElementById('commentsChart').getContext('2d');
+
+        // Vérifier et détruire l'ancien graphique s'il existe
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: postNames,
+                datasets: [{
+                    label: 'Nombre de commentaires',
+                    data: commentCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stepSize: 1
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+
 {% endblock %}

@@ -47,8 +47,7 @@ private int $dislikes = 0;
     public function __construct()
     {
         $this->reponses = new ArrayCollection();
-        $this->likes = new ArrayCollection();
-        $this->dislikes = new ArrayCollection();
+       
         $this->date = new \DateTime(); // Met la date actuelle par défaut
     }
 

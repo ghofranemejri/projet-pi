@@ -7,6 +7,7 @@
     <h1 class="text-center mb-4">📋 FormPost Index</h1>
      {% set query = query|default('') %}
 
+
     <!-- Search Bar (Real-time filtering) -->
     <div class="row justify-content-center mb-3">
         <div class="col-md-6">
@@ -143,49 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
     
-    // ADD COMMENT
-    document.querySelectorAll('.add-comment').forEach(button => {
-        button.addEventListener('click', function () {
-            let postId = this.getAttribute('data-id');
-            let url = this.getAttribute('data-url');
-            let token = this.getAttribute('data-token');
-            let textarea = document.querySelector('#comments-' + postId + ' .comment-text');
-            let commentText = textarea.value.trim();
-
-            if (!commentText) return;
-
-            fetch(url, {
-                method: "POST",
-                headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ contenu: commentText, formPostId: postId, _token: token })
-
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    let commentDiv = document.createElement('div');
-                    commentDiv.classList.add('comment', 'bg-light', 'p-2', 'rounded', 'mb-2');
-                    commentDiv.textContent = commentText;
-
-                    let commentsList = document.getElementById('comments-list-' + postId);
-                    commentsList.appendChild(commentDiv);
-
-                    let commentCount = document.getElementById('comment-count-' + postId);
-                    let commentSectionCount = document.getElementById('comment-count-section-' + postId);
-                    commentCount.textContent = parseInt(commentCount.textContent) + 1;
-                    commentSectionCount.textContent = parseInt(commentSectionCount.textContent) + 1;
-
-                    textarea.value = '';
-                } else {
-                    Swal.fire("Erreur", "Impossible d'ajouter le commentaire.", "error");
-                }
-            })
-            .catch(() => Swal.fire("Erreur", "Une erreur est survenue.", "error"));
-        });
-    });
+    
 
     // REAL-TIME SEARCH FILTER
     const searchInput = document.getElementById("searchInput");
@@ -244,5 +203,30 @@ document.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
 });
 
 </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const badWords = ["merde", "fuck", "putain"]; // Ajoute d'autres mots si besoin
+        const descriptionInput = document.getElementById("post_description");
+        const form = document.getElementById("form_post"); // Assure-toi que c'est l'ID correct de ton formulaire
+        const warningMessage = document.createElement("p");
+        warningMessage.style.color = "red";
+        warningMessage.style.display = "none";
+        warningMessage.innerText = "Votre description contient des mots interdits !";
+        descriptionInput.parentNode.appendChild(warningMessage);
+
+        form.addEventListener("submit", function (event) {
+            let descriptionText = descriptionInput.value.toLowerCase();
+            let containsBadWord = badWords.some(word => descriptionText.includes(word));
+
+            if (containsBadWord) {
+                warningMessage.style.display = "block";
+                event.preventDefault(); // Bloquer la soumission du formulaire
+            } else {
+                warningMessage.style.display = "none";
+            }
+        });
+    });
+</script>
+
 
 {% endblock %}

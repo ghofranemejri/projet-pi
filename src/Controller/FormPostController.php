@@ -24,7 +24,9 @@ final class FormPostController extends AbstractController
     #[Route('/front', name: 'app_form_post_index', methods: ['GET'])]
     public function index(FormPostRepository $formPostRepository, PaginatorInterface $paginator, Request $request): Response
     {
-        $query = $formPostRepository->findAll(); // Récupérer tous les posts
+        $query = $formPostRepository->createQueryBuilder('p')
+    ->orderBy('p.date', 'DESC')
+    ->getQuery();
     
         $pagination = $paginator->paginate(
             $query, // Requête
@@ -264,7 +266,34 @@ public function likeDislike(FormPost $formPost, EntityManagerInterface $entityMa
         'dislikes' => $formPost->getDislikes(),
     ]);
 }
+private array $badWords = ['merde', 'fuck', 'putain']; // Mets à jour ta liste
 
-    
+private function containsBadWords(string $text): bool
+{
+    foreach ($this->badWords as $badWord) {
+        if (stripos($text, $badWord) !== false) {
+            return true;
+        }
+    }
+    return false;
 }
 
+public function createPost(Request $request, EntityManagerInterface $entityManager): Response
+{
+    $description = $request->request->get('description');
+
+    if ($this->containsBadWords($description)) {
+        $this->addFlash('danger', 'Votre description contient des mots interdits !');
+        return $this->redirectToRoute('app_form_post_new'); // Remplace par ta route correcte
+    }
+
+    // Si tout est bon, on enregistre le post
+    $formPost = new Post();
+    $formPost->setDescription($description);
+    $entityManager->persist($formPost);
+    $entityManager->flush();
+
+    $this->addFlash('success', 'Post enregistré avec succès !');
+    return $this->redirectToRoute('app_form_post_index'); // Remplace par la bonne route
+}
+}
