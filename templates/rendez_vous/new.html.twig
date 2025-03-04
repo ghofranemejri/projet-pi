@@ -3,8 +3,16 @@
 {% block title %}New RendezVous{% endblock %}
 
 {% block body %}
-    <h1>Create new RendezVous</h1>
+    <h1>Create New RendezVous</h1>
 
+    {# Affichage du message flash de succès si disponible #}
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+    {# Formulaire de création de rendez-vous #}
     {{ include('rendez_vous/_form.html.twig') }}
 
 {% endblock %}

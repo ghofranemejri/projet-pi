@@ -9,8 +9,9 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Endroid\QrCode\QrCode; // Assure-toi d'ajouter la classe pour générer les QR codes
 
 #[Route('/disponibilite')]
 final class DisponibiliteController extends AbstractController
@@ -175,4 +176,26 @@ public function show(DisponibiliteRepository $repository, int $id): Response
 
         return $this->redirectToRoute('app_disponibilite_index_back', [], Response::HTTP_SEE_OTHER);
     }
+    /*
+    #[Route('/generate-qr-code', name: 'generate_qr_code', methods: ['GET'])]
+    public function generateQrCode(): Response
+    {
+        // URL des disponibilités
+        $url = $this->generateUrl('app_disponibilite_index', [], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL);
+    
+        // Créer le QR Code avec l'URL
+        $qrCode = new QrCode($url);
+        $qrCode->setSize(300);
+        $qrCode->setMargin(10);
+        $qrCode->setForegroundColor([0, 0, 0]);  // Couleur du QR code
+        $qrCode->setBackgroundColor([255, 255, 255]); // Couleur de fond
+    
+        // Retourner l'image en PNG du QR code
+        return new Response(
+            $qrCode->writeString(),
+            200,
+            ['Content-Type' => 'image/png']
+        );
+    }
+    */
 }

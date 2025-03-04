@@ -67,12 +67,12 @@
             {% for rendez_vou in rendez_vouses %}
                 <tr>
                     <td>{{ rendez_vou.id }}</td>
-                    <td>{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d H:i:s') : 'Non précisée' }}</td>
+                    <td>{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d') : 'Non précisée' }}</td>
                     <td>{{ rendez_vou.statut }}</td>
                     <td>{{ rendez_vou.motif }}</td>
                     <td>{{ rendez_vou.patient ? rendez_vou.patient.nom : 'N/A' }}</td>
                     <td>{{ rendez_vou.medecin ? rendez_vou.medecin.nom : 'N/A' }}</td>
-                    <td>{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d H:i:s') : 'Non précisée' }}</td> <!-- Ajout de la date de création -->
+                    <td>{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d') : 'Non précisée' }}</td> <!-- Ajout de la date de création -->
                 </tr>
             {% else %}
                 <tr>

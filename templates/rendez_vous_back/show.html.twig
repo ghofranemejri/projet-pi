@@ -13,7 +13,7 @@
             </tr>
             <tr>
                 <th>Date</th>
-                <td>{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d') : '' }}</td>
             </tr>
             <tr>
                 <th>Statut</th>
@@ -25,7 +25,7 @@
             </tr>
             <tr>
                 <th>Date_creation</th>
-                <td>{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d') : '' }}</td>
             </tr>
         </tbody>
     </table>

@@ -22,23 +22,15 @@
                 {% for disponibilite in disponibilites %}
                     <tr>
                         <td>{{ disponibilite.id }}</td>
-                        <td>
-                            {{ disponibilite.medecin ? disponibilite.medecin.nom : 'Non assigné' }}
-                        </td>
-                        <td>
-                            {{ disponibilite.jour ? disponibilite.jour|date('Y-m-d') : 'N/A' }}
-                        </td>
-                        <td>
-                            {{ disponibilite.heureDebut ? disponibilite.heureDebut|date('H:i') : 'N/A' }}
-                        </td>
-                        <td>
-                            {{ disponibilite.heureFin ? disponibilite.heureFin|date('H:i') : 'N/A' }}
-                        </td>
+                        <td>{{ disponibilite.medecin ? disponibilite.medecin.nom : 'Non assigné' }}</td>
+                        <td>{{ disponibilite.jour ? disponibilite.jour|date('Y-m-d') : 'N/A' }}</td>
+                        <td>{{ disponibilite.heureDebut ? disponibilite.heureDebut|date('H:i') : 'N/A' }}</td>
+                        <td>{{ disponibilite.heureFin ? disponibilite.heureFin|date('H:i') : 'N/A' }}</td>
                         <td>
                             <a href="{{ path('app_disponibilite_show_back', {'id': disponibilite.id}) }}" 
-                               class="btn btn-info btn-sm">Voir</a>
+                               class="btn btn-info btn-sm">👁️</a>
                             <a href="{{ path('app_disponibilite_edit_back', {'id': disponibilite.id}) }}" 
-                               class="btn btn-primary btn-sm">Modifier</a>
+                               class="btn btn-primary btn-sm">✏️</a>
                         </td>
                     </tr>
                 {% else %}
@@ -51,9 +43,37 @@
     </div>
 
     <div class="mt-3">
-        <a href="{{ path('app_disponibilite_new_back') }}" class="btn btn-success">
-            Ajouter une disponibilité
-        </a>
+        <a href="{{ path('app_disponibilite_new_back') }}" class="btn btn-success">➕ Ajouter une disponibilité</a>
+    </div>
+<!--
+    <div class="mt-5">
+        <h3>QR Code pour accéder aux Disponibilités des Médecins</h3>
+        <!-- Div qui contiendra le QR Code -->
+        <div id="qr-code-container" class="text-center">
+            <!-- Le QR Code sera chargé ici dynamiquement via AJAX -->
+        </div>
     </div>
 </div>
+
+<script>
+    // Utilisation de AJAX pour récupérer et afficher le QR code
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('{{ path('generate_qr_code') }}') // Demande le QR code à la route générée
+            .then(response => response.blob()) // Convertir la réponse en Blob
+            .then(data => {
+                // Créer un objet URL pour l'image blob
+                const qrCodeImage = URL.createObjectURL(data);
+                // Ajouter l'image du QR code au conteneur
+                const qrCodeContainer = document.getElementById('qr-code-container');
+                qrCodeContainer.innerHTML = `<img src="${qrCodeImage}" alt="QR Code" style="width: 150px; height: 150px;" />`;
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération du QR Code:', error);
+                const qrCodeContainer = document.getElementById('qr-code-container');
+                qrCodeContainer.innerHTML = `<p class="text-danger">Erreur lors du chargement du QR code</p>`;
+            });
+    });
+</script>
+-->
+
 {% endblock %}
