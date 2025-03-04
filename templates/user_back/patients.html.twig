@@ -1,0 +1,56 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Liste des patients{% endblock %}
+
+{% block content %}
+    <h1>Liste des patients</h1>
+
+    {# Formulaire de tri #}
+    <form method="get" action="{{ path('app_patients_sorted') }}" class="mb-4">
+        <label for="sortBy">Trier par :</label>
+        <select name="sortBy" id="sortBy" class="form-select d-inline-block w-auto">
+            <option value="nom" {{ sortBy == 'nom' ? 'selected' }}>Nom</option>
+            <option value="prenom" {{ sortBy == 'prenom' ? 'selected' }}>Prénom</option>
+            <option value="email" {{ sortBy == 'email' ? 'selected' }}>Email</option>
+        </select>
+
+        <label for="order">Ordre :</label>
+        <select name="order" id="order" class="form-select d-inline-block w-auto">
+            <option value="ASC" {{ order == 'ASC' ? 'selected' }}>Ascendant</option>
+            <option value="DESC" {{ order == 'DESC' ? 'selected' }}>Descendant</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">Trier</button>
+    </form>
+
+    {# Liste des patients #}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if patients is defined and patients|length > 0 %}
+                {% for patient in patients %}
+                    <tr>
+                        <td>{{ patient.nom }}</td>
+                        <td>{{ patient.prenom }}</td>
+                        <td>{{ patient.email }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="3">Aucun patient trouvé.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    {# Pagination #}
+    <div class="pagination">
+        {{ knp_pagination_render(patients) }}
+    </div>
+{% endblock %}

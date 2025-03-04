@@ -10,25 +10,27 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AdminController extends AbstractController
 {
-    #[Route('/admin/users', name: 'admin_users')]
+    // Liste des utilisateurs (BACK-OFFICE)
+    #[Route('/admin/back/users', name: 'admin_back_users')]
     public function listUsers(EntityManagerInterface $entityManager): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
         $users = $entityManager->getRepository(User::class)->findAll();
 
-        return $this->render('admin/users.html.twig', [
+        return $this->render('back/admin/users.html.twig', [
             'users' => $users,
         ]);
     }
 
-    #[Route('/admin/user/{id}/promote/{role}', name: 'admin_user_promote')]
+    // Promotion d'un utilisateur (BACK-OFFICE)
+    #[Route('/admin/back/user/{id}/promote/{role}', name: 'admin_back_user_promote')]
     public function promoteUser(User $user, string $role, EntityManagerInterface $entityManager): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
-        // Only allow valid role promotions
-        $validRoles = ['ROLE_MEDECIN', 'ROLE_ADMIN'];
+        // Correction du rôle ROLE_PATIENT
+        $validRoles = ['ROLE_MEDECIN', 'ROLE_ADMIN', 'ROLE_PATIENT'];
         if (!in_array($role, $validRoles, true)) {
             throw $this->createNotFoundException('Invalid role.');
         }
@@ -36,6 +38,17 @@ class AdminController extends AbstractController
         $user->setRoles([$role]);
         $entityManager->flush();
 
-        return $this->redirectToRoute('admin_users');
+        return $this->redirectToRoute('admin_back_users');
+    }
+
+    // Profil utilisateur (FRONT-OFFICE)
+    #[Route('/user/profile', name: 'user_profile')]
+    public function userProfile(): Response
+    {
+        $this->denyAccessUnlessGranted(['ROLE_USER', 'ROLE_MEDECIN', 'ROLE_ADMIN']);
+
+        return $this->render('front/user/profile.html.twig', [
+            'user' => $this->getUser(),
+        ]);
     }
 }

@@ -1,0 +1,29 @@
+{# templates/dashboard/base_dashboard.html.twig #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}dashboard - eConsult+{% endblock %}</title>
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+</head>
+<body>
+    <header>
+        <h1>dashboard eConsult+</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ path('dashboard_home') }}">Accueil</a></li>
+                <li><a href="{{ path('dashboard_profile') }}">Profil</a></li>
+                <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {% block body %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2023 eConsult+</p>
+    </footer>
+</body>
+</html>

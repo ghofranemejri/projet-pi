@@ -1,6 +1,104 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Tableau de Bord - Médecin{% endblock %}
+
 {% block body %}
-    <h1>Bienvenue, Docteur {{ user.email }}</h1>
-    <p>Vous êtes connecté en tant que Médecin.</p>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Card d'accueil avec l'avatar de l'utilisateur -->
+            <div class="card shadow-sm p-4 text-center bg-light">
+                <h1 class="mb-3">👋 Bienvenue, <span class="text-primary">{{ user.email }}</span></h1>
+                <p class="lead">Vous êtes connecté en tant que <strong>Médecin</strong>.</p>
+                <hr>
+                <a href="#" class="btn btn-info">Accéder à mon profil</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation pour accéder aux différentes sections -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mt-4">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Mon profil</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Mes rendez-vous</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Mes patients</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Messages</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Alertes et Notifications -->
+    <div class="alert alert-info mt-3">
+        <strong>Rappel :</strong> Vous avez 3 rendez-vous aujourd'hui.
+    </div>
+
+    <!-- Section avec des informations supplémentaires sous forme de cartes -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h4>Rendez-vous à venir</h4>
+                <p>Vous avez <strong>5 rendez-vous</strong> à venir cette semaine.</p>
+                <ul>
+                    <li>10/12/2023 - 10:00 - Patient: John Doe</li>
+                    <li>11/12/2023 - 14:00 - Patient: Jane Smith</li>
+                </ul>
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-calendar-alt"></i> Voir tous les rendez-vous
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h4>Mes patients</h4>
+                <p>Vous suivez actuellement <strong>15 patients</strong>.</p>
+                <a href="#" class="btn btn-secondary">
+                    <i class="fas fa-user-friends"></i> Voir mes patients
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section pour les statistiques ou graphiques -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm p-4">
+                <h4>Statistiques des rendez-vous</h4>
+                <canvas id="appointmentsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Intégration de Chart.js pour les graphiques -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('appointmentsChart').getContext('2d');
+    const appointmentsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+            datasets: [{
+                label: 'Nombre de rendez-vous',
+                data: [12, 19, 3, 5, 2],
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
 {% endblock %}

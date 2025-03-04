@@ -1,13 +1,84 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Créer un compte - eConsult+{% endblock %}
+
 {% block body %}
-    <h1>Créer un compte</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h1 class="text-center">eConsult+</h1>
+                <h2 class="text-center">Créer un compte</h2>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+                {# Affiche les messages flash #}
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger">
+                        {{ message }}
+                    </div>
+                {% endfor %}
 
-        <button type="submit" class="btn btn-primary">S'inscrire</button>
-    {{ form_end(registrationForm) }}
+                {# Formulaire d'inscription #}
+                {{ form_start(registrationForm, {'attr': {'class': 'form', 'id': 'registration-form'}}) }}
+                    <div class="form-group">
+                        {{ form_label(registrationForm.email, 'Email') }}
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control', 'placeholder': 'Entrez votre email'}}) }}
+                        {{ form_errors(registrationForm.email) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_label(registrationForm.plainPassword, 'Mot de passe') }}
+                        {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control', 'placeholder': 'Entrez votre mot de passe'}}) }}
+                        {{ form_errors(registrationForm.plainPassword) }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(registrationForm.agreeTerms, 'J\'accepte les termes et conditions', {'label_attr': {'class': 'form-check-label'}}) }}
+                        {{ form_errors(registrationForm.agreeTerms) }}
+                    </div>
+
+                    {# Champ reCAPTCHA #}
+                    <div class="form-group">
+                        <div class="g-recaptcha" data-sitekey="6LfRluYqAAAAAJvuXL4yR3QGDysqlTsINiyRxdfG"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Créer un compte</button>
+                {{ form_end(registrationForm) }}
+
+                <div class="text-center mt-3">
+                    <p>Vous avez déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inclure le script reCAPTCHA de Google -->
+<script src="https://www.google.com/recaptcha/api.js?render=6LfRluYqAAAAAJvuXL4yR3QGDysqlTsINiyRxdfG"></script>
+<!-- Script pour gérer la soumission du formulaire avec reCAPTCHA -->
+<script>
+    document.getElementById('registration-form').addEventListener('submit', function(event) {
+        const recaptchaResponse = grecaptcha.getResponse();
+        if (recaptchaResponse.length === 0) {
+            event.preventDefault();
+            alert('Veuillez compléter la vérification reCAPTCHA.');
+            // Exécute reCAPTCHA
+        grecaptcha.ready(function() {
+            grecaptcha.execute('6LfRluYqAAAAAJvuXL4yR3QGDysqlTsINiyRxdfG', {action: 'submit'}).then(function(token) {
+                // Ajoute le token reCAPTCHA au formulaire
+                const recaptchaInput = document.createElement('input');
+                recaptchaInput.type = 'hidden';
+                recaptchaInput.name = 'recaptcha_token';
+                recaptchaInput.value = token;
+                document.getElementById('registration-form').appendChild(recaptchaInput);
+
+        }
+    });
+</script>
+
 {% endblock %}
