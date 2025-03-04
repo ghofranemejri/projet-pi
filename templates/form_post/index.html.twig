@@ -7,7 +7,9 @@
     <h1 class="text-center mb-4">📋 FormPost Index</h1>
      {% set query = query|default('') %}
 
-
+{% for message in app.flashes('danger') %}
+    <div class="alert alert-danger">{{ message }}</div>
+{% endfor %}
     <!-- Search Bar (Real-time filtering) -->
     <div class="row justify-content-center mb-3">
         <div class="col-md-6">
@@ -204,29 +206,33 @@ document.querySelectorAll('.like-btn, .dislike-btn').forEach(button => {
 
 </script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const badWords = ["merde", "fuck", "putain"]; // Ajoute d'autres mots si besoin
-        const descriptionInput = document.getElementById("post_description");
-        const form = document.getElementById("form_post"); // Assure-toi que c'est l'ID correct de ton formulaire
-        const warningMessage = document.createElement("p");
-        warningMessage.style.color = "red";
-        warningMessage.style.display = "none";
-        warningMessage.innerText = "Votre description contient des mots interdits !";
-        descriptionInput.parentNode.appendChild(warningMessage);
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("submitPost")?.addEventListener("click", async function(event) {
+        event.preventDefault(); // Empêcher l'envoi du formulaire
 
-        form.addEventListener("submit", function (event) {
-            let descriptionText = descriptionInput.value.toLowerCase();
-            let containsBadWord = badWords.some(word => descriptionText.includes(word));
+        let description = document.getElementById("description")?.value;
 
-            if (containsBadWord) {
-                warningMessage.style.display = "block";
-                event.preventDefault(); // Bloquer la soumission du formulaire
+        if (!description) {
+            alert("Veuillez entrer une description.");
+            return;
+        }
+
+        try {
+            let response = await fetch(`https://www.purgomalum.com/service/containsprofanity?text=${encodeURIComponent(description)}`);
+            let isProfane = await response.text();
+
+            if (isProfane.trim() === "true") { // Vérifier correctement la réponse
+                alert("Votre message contient des mots interdits !");
             } else {
-                warningMessage.style.display = "none";
+                document.getElementById("postForm")?.submit(); // Si OK, soumettre le formulaire
             }
-        });
+        } catch (error) {
+            console.error("Erreur avec l'API :", error);
+            alert("Erreur lors de la vérification du contenu. Veuillez réessayer.");
+        }
     });
-</script>
+});
+
 
 
 {% endblock %}

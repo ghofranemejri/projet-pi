@@ -8,6 +8,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\BadWordFilter;
 
 #[ORM\Entity(repositoryClass: FormPostRepository::class)]
 class FormPost

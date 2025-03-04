@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Impersonate User{% endblock %}
+
+{% block body %}
+    <h2>Select User to Impersonate</h2>
+
+    <!-- Role Selection -->
+    <label for="role">Select Role:</label>
+    <select id="role">
+        <option value="">-- Choose Role --</option>
+        {% for role in roles %}
+            <option value="{{ role }}" {{ role == selectedRole ? 'selected' : '' }}>{{ role }}</option>
+        {% endfor %}
+    </select>
+
+    <!-- User Selection (Initially Hidden) -->
+    <form id="userForm" method="POST" style="display: none;">
+        <label for="user">Select User:</label>
+        <select id="user" name="user">
+            <option value="">-- Choose User --</option>
+        </select>
+        <button type="submit">Login as User</button>
+    </form>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const roleSelect = document.getElementById("role");
+        const userSelect = document.getElementById("user");
+        const userForm = document.getElementById("userForm");
+
+        roleSelect.addEventListener("change", function () {
+            const selectedRole = roleSelect.value;
+
+            if (!selectedRole) {
+                userSelect.innerHTML = '<option value="">-- Choose User --</option>';
+                userForm.style.display = "none";
+                return;
+            }
+
+            fetch('/impersonate/users?role=' + encodeURIComponent(selectedRole))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("HTTP error " + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Users received:", data); // Debugging
+
+                    userSelect.innerHTML = '<option value="">-- Choose User --</option>';
+                    data.forEach(user => {
+                        let option = document.createElement("option");
+                        option.value = user.id;
+                        option.textContent = user.name;
+                        userSelect.appendChild(option);
+                    });
+
+                    userForm.style.display = data.length > 0 ? "block" : "none";
+                })
+                .catch(error => {
+                    console.error("Error fetching users:", error);
+                    alert("Failed to load users. Check console for details.");
+                });
+        });
+    });
+</script>
+
+{% endblock %}

@@ -16,11 +16,15 @@ use App\Entity\Reponse;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\User;
-
-
-#[Route('/form/post')]
+use App\Service\BadWordFilter;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class FormPostController extends AbstractController
 {
+#[Route('/form/post')]
+
+
     #[Route('/front', name: 'app_form_post_index', methods: ['GET'])]
     public function index(FormPostRepository $formPostRepository, PaginatorInterface $paginator, Request $request): Response
     {
@@ -56,19 +60,24 @@ final class FormPostController extends AbstractController
     }
 
     #[Route('/front/new', name: 'app_form_post_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, BadWordFilter $badWordFilter): Response
+
     {
         $formPost = new FormPost();
         $form = $this->createForm(FormPostType::class, $formPost);
         $form->handleRequest($request);
-
         if ($form->isSubmitted() && $form->isValid()) {
+            if ($badWordFilter->containsBadWords($formPost->getDescription())) {
+                $this->addFlash('danger', 'Votre description contient des mots interdits.');
+                return $this->redirectToRoute('app_form_post_new');
+            }
+    
             $entityManager->persist($formPost);
             $entityManager->flush();
-
+    
             return $this->redirectToRoute('app_form_post_index');
         }
-
+    
         return $this->render('form_post/new.html.twig', [
             'form_post' => $formPost,
             'form' => $form->createView(),
@@ -265,35 +274,5 @@ public function likeDislike(FormPost $formPost, EntityManagerInterface $entityMa
         'likes' => $formPost->getLikes(),
         'dislikes' => $formPost->getDislikes(),
     ]);
-}
-private array $badWords = ['merde', 'fuck', 'putain']; // Mets à jour ta liste
-
-private function containsBadWords(string $text): bool
-{
-    foreach ($this->badWords as $badWord) {
-        if (stripos($text, $badWord) !== false) {
-            return true;
-        }
-    }
-    return false;
-}
-
-public function createPost(Request $request, EntityManagerInterface $entityManager): Response
-{
-    $description = $request->request->get('description');
-
-    if ($this->containsBadWords($description)) {
-        $this->addFlash('danger', 'Votre description contient des mots interdits !');
-        return $this->redirectToRoute('app_form_post_new'); // Remplace par ta route correcte
-    }
-
-    // Si tout est bon, on enregistre le post
-    $formPost = new Post();
-    $formPost->setDescription($description);
-    $entityManager->persist($formPost);
-    $entityManager->flush();
-
-    $this->addFlash('success', 'Post enregistré avec succès !');
-    return $this->redirectToRoute('app_form_post_index'); // Remplace par la bonne route
 }
 }
