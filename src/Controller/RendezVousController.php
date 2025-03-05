@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Service\PdfGenerator;
-use Symfony\Component\Mailer\MailerInterface; // Assurez-vous d'importer cette interface
+use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 
 
@@ -39,18 +39,171 @@ final class RendezVousController extends AbstractController
         $form = $this->createForm(RendezVousType::class, $rendezVou);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($rendezVou);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_rendez_vous_index_back');
+        if ($form->isSubmitted()) {
+            dump($form->getData());
+            dump($rendezVou->getPatient());
+            dump($rendezVou->getMedecin());
+        
+            if ($form->isValid()) {
+                $entityManager->persist($rendezVou);
+                $entityManager->flush();
+        
+                return $this->redirectToRoute('app_rendez_vous_index_back');
+            }
+        
+            // Dumping form errors
+            foreach ($form->getErrors(true) as $error) {
+                dump($error->getMessage());
+            }
+        
+            die('Form submission failed.');
         }
+        
 
         return $this->render('rendez_vous_back/new.html.twig', [
             'rendez_vou' => $rendezVou,
             'form' => $form,
         ]);
     }
+
+    
+    #[Route('', name: 'app_rendez_vous_index', methods: ['GET'])]
+    public function index(Request $request, RendezVousRepository $rendezVousRepository): Response
+    {
+        $query = $request->query->get('q', '');
+        $rendezVouses = $query
+            ? $rendezVousRepository->searchRendezVous($query)
+            : $rendezVousRepository->findAll();
+
+        return $this->render('rendez_vous/index.html.twig', [
+            'rendez_vouses' => $rendezVouses,
+            'query' => $query,
+        ]);
+    }
+
+    #[Route('/new', name: 'app_rendez_vous_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    {
+        $rendezVou = new RendezVous();
+        $form = $this->createForm(RendezVousType::class, $rendezVou);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($rendezVou);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Votre rendez-vous a été enregistré avec succès.');
+            $this->envoyerEmailConfirmation($rendezVou, $mailer);
+
+            return $this->redirectToRoute('app_front');
+        }
+
+        return $this->render('rendez_vous/new.html.twig', [
+            'rendez_vou' => $rendezVou,
+            'form' => $form->createView(),
+        ]);
+    }
+
+    private function envoyerEmailConfirmation(RendezVous $rendezVou, MailerInterface $mailer)
+    {
+        $patient = $rendezVou->getPatient();
+        $email = (new Email())
+            ->from('votre-email@domain.com')
+            ->to($patient->getEmail())
+            ->subject('Confirmation de votre rendez-vous')
+            ->html('<p>Bonjour </p>
+                    <p>Votre rendez-vous a été confirmé pour le ' . $rendezVou->getDate()->format('d-m-Y H:i:s') . '.</p>');
+
+        $mailer->send($email);
+    }
+
+    
+    #[Route('/back/rendez-vous/recherche', name: 'app_rendez_vous_search', methods: ['GET'])]
+    public function recherche(Request $request, RendezVousRepository $repository): Response
+    {
+        $query = $request->query->get('q', '');
+        $rendezVouses = $repository->searchRendezVous($query);
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('rendez_vous_back/search.html.twig', [
+                'rendez_vouses' => $rendezVouses,
+                'query' => $query,
+            ]);
+        }
+
+        return $this->render('rendez_vous_back/index.html.twig', [
+            'rendez_vouses' => $rendezVouses,
+            'query' => $query,
+        ]);
+    }
+
+    #[Route('/back/rendez_vous/pdf', name: 'app_rendez_vous_pdf', methods: ['GET'])]
+    public function generatePdf(RendezVousRepository $rendezVousRepository, PdfGenerator $pdfGenerator): Response
+    {
+        $rendezVouses = $rendezVousRepository->findAll();
+        $htmlContent = $this->renderView('rendez_vous_back/pdf.html.twig', [
+            'rendez_vouses' => $rendezVouses,
+        ]);
+
+        $pdf = $pdfGenerator->generatePdf($htmlContent);
+
+        return new Response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="rendezvous_list.pdf"',
+        ]);
+    }
+
+
+
+
+
+
+
+    #[Route('/back/{id}/changer-statut', name: 'app_rendez_vous_changer_statut', methods: ['POST'])]
+    public function changerStatut(RendezVous $rendezVou, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
+    {
+        $nouveauStatut = $request->get('statut');
+        $rendezVou->setStatut($nouveauStatut);
+
+        $entityManager->flush();
+        $this->envoyerEmailStatut($rendezVou, $mailer);
+
+        return $this->redirectToRoute('app_rendez_vous_index_back');
+    }
+
+    private function envoyerEmailStatut(RendezVous $rendezVou, MailerInterface $mailer)
+    {
+        $patient = $rendezVou->getPatient();
+        $email = (new Email())
+            ->from('rouaatouil3@gmail.com')
+            ->to($patient->getEmail())
+            ->subject('Statut de votre Rendez-vous');
+
+        switch ($rendezVou->getStatut()) {
+            case 'confirmé':
+                $email->html('<p>Bonjour</p>
+                              <p>Votre rendez-vous a été confirmé pour le ' . $rendezVou->getDate()->format('d-m-Y H:i:s') . '.</p>');
+                break;
+
+            case 'en attente':
+                $email->html('<p>Bonjour </p>
+                              <p>Votre rendez-vous est actuellement en attente. Nous vous tiendrons informé dès que possible.</p>');
+                break;
+
+            case 'refusé':
+                $email->html('<p>Bonjour </p>
+                              <p>Nous sommes désolés, votre rendez-vous a été refusé.</p>');
+                break;
+        }
+
+        $mailer->send($email);
+    }
+
+
+
+
+
+
 
     #[Route('/back/{id}/show', name: 'app_rendez_vous_show_back', methods: ['GET'])]
     public function backshow(RendezVous $rendezVou): Response
@@ -89,47 +242,6 @@ final class RendezVousController extends AbstractController
         return $this->redirectToRoute('app_rendez_vous_index_back');
     }
 
-    #[Route('', name: 'app_rendez_vous_index', methods: ['GET'])]
-    public function index(Request $request, RendezVousRepository $rendezVousRepository): Response
-    {
-        $query = $request->query->get('q', '');
-
-        $rendezVouses = $query
-            ? $rendezVousRepository->searchRendezVous($query)
-            : $rendezVousRepository->findAll();
-
-        return $this->render('rendez_vous/index.html.twig', [
-            'rendez_vouses' => $rendezVouses,
-            'query' => $query,
-        ]);
-    }
-
-   
-    #[Route('/new', name: 'app_rendez_vous_new', methods: ['GET', 'POST'])]
-public function new(Request $request, EntityManagerInterface $entityManager): Response
-{
-    $rendezVou = new RendezVous();
-    $form = $this->createForm(RendezVousType::class, $rendezVou);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Enregistrement du rendez-vous
-        $entityManager->persist($rendezVou);
-        $entityManager->flush();
-
-        // Ajouter le message flash
-        $this->addFlash('success', 'Votre rendez-vous a été enregistré avec succès.');
-
-        // Rediriger vers la page front
-        return $this->redirectToRoute('app_front');
-    }
-
-    return $this->render('rendez_vous/new.html.twig', [
-        'rendez_vou' => $rendezVou,
-        'form' => $form->createView(), // Assurez-vous de passer form->createView()
-    ]);
-}
-
     #[Route('/{id}/show', name: 'app_rendez_vous_show', methods: ['GET'])]
     public function show(RendezVous $rendezVou): Response
     {
@@ -167,91 +279,29 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
         return $this->redirectToRoute('app_rendez_vous_index');
     }
 
-    #[Route('/back/rendez-vous/recherche', name: 'app_rendez_vous_search', methods: ['GET'])]
-    public function recherche(Request $request, RendezVousRepository $repository): Response
-    {
-        $query = $request->query->get('q', '');
-        $rendez_vouses = $repository->searchRendezVous($query); // Recherche des rendez-vous selon le nom ou critère
+    #[Route('/back/{id}/send-email', name: 'app_rendez_vous_send_email', methods: ['POST'])]
+public function sendEmail(RendezVous $rendezVou, MailerInterface $mailer): Response
+{
+    // Get the patient's email from the rendezVous entity
+    $patient = $rendezVou->getPatient();
+    
+    // Prepare the email content
+    $email = (new Email())
+        ->from('rouaatouil3@gmail.com') // Your email address
+        ->to($patient->getEmail()) // Patient's email address
+        ->subject('Notification de Rendez-vous')
+        ->html('<p>Bonjour </p>
+                <p>Nous vous rappelons que vous avez un rendez-vous prévu pour le ' . $rendezVou->getDate()->format('d-m-Y H:i:s') . '.</p>');
 
-        if ($request->isXmlHttpRequest()) { // Vérifie si la requête est AJAX
-            return $this->render('rendez_vous_back/search.html.twig', [
-                'rendez_vouses' => $rendez_vouses,
-                'query' => $query
-            ]);
-        }
+    // Send the email
+    $mailer->send($email);
 
-        return $this->render('rendez_vous_back/index.html.twig', [
-            'rendez_vouses' => $rendez_vouses,
-            'query' => $query,
-        ]);
-    }
+    // Add a flash message to inform the user that the email was sent
+    $this->addFlash('success', 'L\'email a été envoyé avec succès.');
 
-    // Correction du PDF : La méthode GET est plus appropriée pour générer un PDF
-    #[Route('/back/rendez_vous/pdf', name: 'app_rendez_vous_pdf', methods: ['GET'])]
-    public function generatePdf(RendezVousRepository $rendezVousRepository, PdfGenerator $pdfGenerator): Response
-    {
-        // Récupérer tous les rendez-vous
-        $rendezVouses = $rendezVousRepository->findAll();
+    // Redirect back to the list of rendez-vous
+    return $this->redirectToRoute('app_rendez_vous_index_back');
+}
 
-        // Générer le contenu HTML pour le PDF
-        $htmlContent = $this->renderView('rendez_vous_back/pdf.html.twig', [
-            'rendez_vouses' => $rendezVouses,
-        ]);
 
-        // Utiliser le service PdfGenerator pour générer le PDF
-        $pdf = $pdfGenerator->generatePdf($htmlContent);
-
-        // Retourner le PDF comme une réponse HTTP
-        return new Response($pdf, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="rendezvous_list.pdf"',
-        ]);
-    }
-    private function envoyerEmailStatut(RendezVous $rendezVou, MailerInterface $mailer)
-    {
-        $patient = $rendezVou->getPatient(); // On récupère l'objet patient
-        $email = (new Email())
-            ->from('no-reply@votresite.com')
-            ->to($patient->getEmail()) // L'email du patient
-            ->subject('Statut de votre Rendez-vous');
-
-        // Construction du corps de l'email en fonction du statut
-        switch ($rendezVou->getStatut()) {
-            case 'confirmé':
-                $email->html('<p>Bonjour ' . $patient->getNom() . ',</p>
-                              <p>Votre rendez-vous a été confirmé pour le ' . $rendezVou->getDate()->format('d-m-Y H:i:s') . '.</p>');
-                break;
-
-            case 'en attente':
-                $email->html('<p>Bonjour ' . $patient->getNom() . ',</p>
-                              <p>Votre rendez-vous est actuellement en attente. Nous vous tiendrons informé dès que possible.</p>');
-                break;
-
-            case 'refusé':
-                $email->html('<p>Bonjour ' . $patient->getNom() . ',</p>
-                              <p>Nous sommes désolés, votre rendez-vous a été refusé.</p>');
-                break;
-        }
-
-        // Envoi de l'email
-        $mailer->send($email);
-    }
-
-    // Exemple de route pour changer le statut d'un rendez-vous et envoyer l'email
-    #[Route('/back/{id}/changer-statut', name: 'app_rendez_vous_changer_statut', methods: ['POST'])]
-    public function changerStatut(RendezVous $rendezVou, Request $request, EntityManagerInterface $entityManager, MailerInterface $mailer): Response
-    {
-        // Mise à jour du statut à partir du formulaire
-        $nouveauStatut = $request->get('statut'); // Récupérer le statut envoyé dans la requête
-        $rendezVou->setStatut($nouveauStatut);
-
-        // Sauvegarde des modifications dans la base de données
-        $entityManager->flush();
-
-        // Envoi de l'email
-        $this->envoyerEmailStatut($rendezVou, $mailer);
-
-        // Rediriger vers la page des rendez-vous
-        return $this->redirectToRoute('app_rendez_vous_index_back');
-    }
 }

@@ -22,3 +22,9 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+# config/services.yaml
+framework:
+    mailer:
+        # Configure the DSN for your mailer. You can store the DSN in your .env file to keep it environment-specific.
+        dsn: '%env(MAILER_DSN)%'

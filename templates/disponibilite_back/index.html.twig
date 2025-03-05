@@ -22,7 +22,7 @@
                 {% for disponibilite in pagination %}
                     <tr>
                         <td>{{ disponibilite.id }}</td>
-                        <td>{{ disponibilite.medecin ? disponibilite.medecin.nom : 'Non assigné' }}</td>
+                        <td>{{ disponibilite.medecin ? disponibilite.medecin.email : 'Non assigné' }}</td>
                         <td>{{ disponibilite.jour ? disponibilite.jour|date('Y-m-d') : 'N/A' }}</td>
                         <td>{{ disponibilite.heureDebut ? disponibilite.heureDebut|date('H:i') : 'N/A' }}</td>
                         <td>{{ disponibilite.heureFin ? disponibilite.heureFin|date('H:i') : 'N/A' }}</td>

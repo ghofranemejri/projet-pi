@@ -43,17 +43,19 @@ class RendezVous
     #[ORM\ManyToOne(inversedBy: 'rendezVouses')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotBlank(message: "Le patient doit être sélectionné.")]
-    private ?Patient $Patient = null;
+    private ?User $patient = null;
 
     #[ORM\ManyToOne(inversedBy: 'rendezVouses')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotBlank(message: "Le médecin doit être sélectionné.")]
-    private ?Medecin $Medecin = null;
+    private ?User $medecin = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotBlank(message: "La date de création ne peut pas être vide.")]
     #[Assert\Type("\DateTimeInterface", message: "La date de création doit être un format valide.")]
     private ?\DateTimeInterface $date_creation = null;
+
+    // Getters and Setters
 
     public function getId(): ?int
     {
@@ -96,26 +98,26 @@ class RendezVous
         return $this;
     }
 
-    public function getPatient(): ?Patient
+    public function getPatient(): ?User
     {
-        return $this->Patient;
+        return $this->patient;
     }
 
-    public function setPatient(?Patient $Patient): static
+    public function setPatient(?User $patient): static
     {
-        $this->Patient = $Patient;
+        $this->patient = $patient;
 
         return $this;
     }
 
-    public function getMedecin(): ?Medecin
+    public function getMedecin(): ?User
     {
-        return $this->Medecin;
+        return $this->medecin;
     }
 
-    public function setMedecin(?Medecin $Medecin): static
+    public function setMedecin(?User $medecin): static
     {
-        $this->Medecin = $Medecin;
+        $this->medecin = $medecin;
 
         return $this;
     }
@@ -130,5 +132,17 @@ class RendezVous
         $this->date_creation = $date_creation;
 
         return $this;
+    }
+
+    // Get patient email
+    public function getPatientEmail(): ?string
+    {
+        return $this->patient ? $this->patient->getEmail() : null;
+    }
+
+    // Get medecin email
+    public function getMedecinEmail(): ?string
+    {
+        return $this->medecin ? $this->medecin->getEmail() : null;
     }
 }

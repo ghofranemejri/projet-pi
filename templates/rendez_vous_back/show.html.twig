@@ -30,6 +30,10 @@
         </tbody>
     </table>
 
+    <form action="{{ path('app_rendez_vous_send_email', {'id': rendez_vou.id}) }}" method="POST">
+    <button type="submit" class="btn btn-primary">Envoyer un email au patient</button>
+</form>
+
     <a href="{{ path('app_rendez_vous_index_back') }}">back to list</a>
 
     <a href="{{ path('app_rendez_vous_edit_back', {'id': rendez_vou.id}) }}">edit</a>

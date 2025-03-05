@@ -47,8 +47,8 @@
                         <td class="post-date">{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d') : '' }}</td>
                         <td class="post-statut">{{ rendez_vou.statut }}</td>
                         <td class="post-motif">{{ rendez_vou.motif }}</td>
-                        <td class="post-patient">{{ rendez_vou.patient ? rendez_vou.patient.nom : 'N/A' }}</td>
-                        <td class="post-medecin">{{ rendez_vou.medecin ? rendez_vou.medecin.nom : 'N/A' }}</td>
+                        <td class="post-patient">{{ rendez_vou.patient ? rendez_vou.patient.email : 'N/A' }}</td>
+                        <td class="post-medecin">{{ rendez_vou.medecin ? rendez_vou.medecin.email : 'N/A' }}</td>
                         <td class="post-dateCreation">{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d') : '' }}</td>
                         <td class="post-actions">
                             <!-- Remplacement des boutons par des emojis -->

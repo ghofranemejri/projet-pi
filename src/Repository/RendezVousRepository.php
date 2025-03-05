@@ -23,7 +23,7 @@ class RendezVousRepository extends ServiceEntityRepository
 {
     return $this->createQueryBuilder('r')
         ->join('r.Patient', 'p')
-        ->andWhere('p.nom LIKE :query')
+        ->andWhere('p.email LIKE :query')
         ->setParameter('query', '%' . $query . '%')
         ->getQuery()
         ->getResult();

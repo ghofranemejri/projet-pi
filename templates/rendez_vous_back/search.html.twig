@@ -22,8 +22,8 @@
                     <td>{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d') : '' }}</td>
                     <td>{{ rendez_vou.statut }}</td>
                     <td>{{ rendez_vou.motif }}</td>
-                    <td>{{ rendez_vou.patient ? rendez_vou.patient.nom : 'N/A' }}</td>
-                    <td>{{ rendez_vou.medecin ? rendez_vou.medecin.nom : 'N/A' }}</td>
+                    <td>{{ rendez_vou.patient ? rendez_vou.patient.email : 'N/A' }}</td>
+                    <td>{{ rendez_vou.medecin ? rendez_vou.medecin.email : 'N/A' }}</td>
                     <td>{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d') : '' }}</td>
                     <td>
                         <a href="{{ path('app_rendez_vous_show_back', {'id': rendez_vou.id}) }}" class="btn btn-info btn-sm">👁️</a>
