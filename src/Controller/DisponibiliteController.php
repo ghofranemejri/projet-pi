@@ -12,7 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Endroid\QrCode\QrCode; // Assure-toi d'ajouter la classe pour générer les QR codes
-
+use Knp\Component\Pager\PaginatorInterface;
 #[Route('/disponibilite')]
 final class DisponibiliteController extends AbstractController
 {
@@ -98,10 +98,23 @@ public function show(DisponibiliteRepository $repository, int $id): Response
     }
 
     #[Route('/back', name: 'app_disponibilite_index_back', methods: ['GET'])]
-    public function back_index(DisponibiliteRepository $repository): Response
-    {
+    public function back_index(
+        Request $request, 
+        DisponibiliteRepository $repository, 
+        PaginatorInterface $paginator
+    ): Response {
+        // Créez un QueryBuilder pour récupérer les disponibilités
+        $queryBuilder = $repository->createQueryBuilder('d');
+    
+        // Paginer les résultats (ici 5 éléments par page)
+        $pagination = $paginator->paginate(
+            $queryBuilder,
+            $request->query->getInt('page', 1), // Page courante (page 1 par défaut)
+            4 // Nombre d'éléments par page
+        );
+    
         return $this->render('disponibilite_back/index.html.twig', [
-            'disponibilites' => $repository->findAll(),
+            'pagination' => $pagination,
         ]);
     }
 
