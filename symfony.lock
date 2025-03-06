@@ -284,6 +284,6 @@
         ]
     },
     "twig/extra-bundle": {
-        "version": "v3.19.0"
+        "version": "v3.20.0"
     }
 }
