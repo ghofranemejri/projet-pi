@@ -7,6 +7,16 @@
             <div class="card shadow-sm p-4">
                 <h1 class="text-center">Connexion</h1>
 
+                {# Afficher les messages flash (succès ou erreur) #}
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                {# Afficher les erreurs d'authentification #}
                 {% if error %}
                     <div class="alert alert-danger">
                         {{ error.messageKey|trans(error.messageData, 'security') }}
@@ -15,7 +25,6 @@
 
                 <form id="login-form" method="post">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                    <input type="hidden" id="recaptchaToken" name="recaptchaToken">
 
                     <div class="mb-3">
                         <label for="inputEmail" class="form-label">Email</label>
@@ -29,12 +38,14 @@
 
                     <div class="form-group">
                         <div class="g-recaptcha" data-sitekey="{{ google_recaptcha_site_key }}"></div>
-                        {{ google_recaptcha_site_key }}
-                        
-   
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+
+                    {# Ajout du lien "Mot de passe oublié" #}
+                    <div class="mt-3 text-center">
+                        <a href="{{ path('app_test_email') }}" class="text-muted">Mot de passe oublié ?</a>
+                    </div>
                 </form>
             </div>
         </div>
@@ -42,13 +53,15 @@
 </div>
 
 <script>
-    grecaptcha.ready(function() {
-        grecaptcha.execute('{{ google_recaptcha_site_key }}', {action: 'submit'}).then(function(token) {
-            document.getElementById('recaptcha-token').value = token;
-        });
-    });
+    // Assurez-vous d'ajouter le script reCAPTCHA v2 ici
+    // Ce script charge le widget reCAPTCHA v2 sur la page
+    (function() {
+        var recaptchaScript = document.createElement('script');
+        recaptchaScript.src = 'https://www.google.com/recaptcha/api.js';
+        recaptchaScript.async = true;
+        recaptchaScript.defer = true;
+        document.head.appendChild(recaptchaScript);
+    })();
 </script>
-
-<input type="hidden" name="recaptcha_token" id="recaptcha-token">
 
 {% endblock %}

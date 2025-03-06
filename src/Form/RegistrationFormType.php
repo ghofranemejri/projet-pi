@@ -3,7 +3,6 @@
 namespace App\Form;
 
 use App\Entity\User;
-use Karser\Recaptcha3Bundle\Form\Recaptcha3Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -12,7 +11,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\IsTrue;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Karser\Recaptcha3Bundle\Form\Recaptcha3Type as FormRecaptcha3Type;
 
 class RegistrationFormType extends AbstractType
 {
@@ -41,17 +39,8 @@ class RegistrationFormType extends AbstractType
                         'max' => 4096,
                     ]),
                 ],
-            ])
-            ->add('recaptcha', FormRecaptcha3Type::class, [
-              'mapped' => false,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please complete the reCAPTCHA',
-                    ]),
-                ],
             ]);
     }
-
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([

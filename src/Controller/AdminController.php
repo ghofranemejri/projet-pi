@@ -45,7 +45,7 @@ class AdminController extends AbstractController
     #[Route('/user/profile', name: 'user_profile')]
     public function userProfile(): Response
     {
-        $this->denyAccessUnlessGranted(['ROLE_USER', 'ROLE_MEDECIN', 'ROLE_ADMIN']);
+        $this->denyAccessUnlessGranted(['ROLE_MEDECIN', 'ROLE_MEDECIN', 'ROLE_ADMIN']);
 
         return $this->render('front/user/profile.html.twig', [
             'user' => $this->getUser(),

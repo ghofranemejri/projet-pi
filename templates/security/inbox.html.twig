@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm p-4">
+                <h1 class="text-center">My Inbox</h1>
+
+                {# Afficher les messages flash #}
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label == 'success' ? 'success' : 'danger' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Inboxes</th>
+                            <th>Total Sent</th>
+                            <th>Messages</th>
+                            <th>Max Size</th>
+                            <th>Last Message</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ inboxes }}</td>
+                            <td>{{ totalSent }}</td>
+                            <td>{{ totalSent }} / {{ maxSize }}</td>
+                            <td>{{ maxSize }}</td>
+                            <td>{{ lastMessage ? lastMessage.sentAt|date('Y-m-d H:i:s') : 'Aucun' }}</td>
+                            <td>
+                                <a href="{{ path('app_test_email') }}" class="btn btn-sm btn-primary">Envoyer un test</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Messages</h3>
+                {% if messages|length > 0 %}
+                    <ul class="list-group">
+                        {% for message in messages %}
+                            <li class="list-group-item">
+                                <strong>{{ message.subject }}</strong> - De : {{ message.sender }} à {{ message.recipient }}<br>
+                                <small>{{ message.sentAt|date('Y-m-d H:i:s') }}</small><br>
+                                {{ message.body }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Aucun message envoyé pour le moment.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

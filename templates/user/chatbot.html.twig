@@ -1,0 +1,38 @@
+<!-- templates/chatbot/chatbot.html.twig -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+</head>
+<body>
+    <div id="chatbox">
+        <div id="chat-output">
+            <p>Bienvenue dans le chatbot !</p>
+        </div>
+        <input type="text" id="user-input" placeholder="Tapez votre message...">
+        <button onclick="sendMessage()">Envoyer</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            var userMessage = document.getElementById('user-input').value;
+            if (userMessage) {
+                // Envoie le message à l'API du chatbot
+                fetch('/chatbot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: userMessage })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('chat-output').innerHTML += "<p>" + data.reply + "</p>";
+                });
+            }
+        }
+    </script>
+</body>
+</html>
