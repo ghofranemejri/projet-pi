@@ -1,0 +1,89 @@
+{# templates/prescription/show.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Prescriptions et Traitements{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="page-header">
+        <h1>Prescriptions et Traitements du Patient</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5>Liste des Prescriptions</h5>
+        </div>
+        <div class="card-body">
+            {% if prescriptions is empty %}
+                <p>Aucune prescription trouvée pour ce patient.</p>
+            {% else %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Date Début</th>
+                            <th>Date Fin</th>
+                            <th>Adresse</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for prescription in prescriptions %}
+                            <tr>
+                                <td>{{ prescription.datedeb|date('d/m/Y') }}</td>
+                                <td>{{ prescription.datefin|date('d/m/Y') }}</td>
+                                <td>{{ prescription.address }}</td>
+                                <td>
+                                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#prescriptionModal{{ prescription.id }}">Voir Détails</button>
+                                </td>
+                            </tr>
+
+                            <!-- Modal for Prescription Details -->
+                            <div class="modal fade" id="prescriptionModal{{ prescription.id }}" tabindex="-1" role="dialog" aria-labelledby="prescriptionModalLabel{{ prescription.id }}" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="prescriptionModalLabel{{ prescription.id }}">Détails de la Prescription</h5>
+                                            
+                                        </div>
+                                        <div class="modal-body">
+                                            <h5>Traitements Associés</h5>
+                                            <ul>
+                                                {% for traitement in traitements[prescription.id] %}
+                                                    <li>
+                                                        {{ traitement.medicament }} - {{ traitement.dose }}mg - {{ traitement.description }}
+                                                    </li>
+                                                {% else %}
+                                                    <li>Aucun traitement associé</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Script pour ouvrir le modal associé à une prescription
+        {% for prescription in prescriptions %}
+            $('#prescriptionModal{{ prescription.id }}').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget); // Bouton qui a déclenché le modal
+                var modal = $(this);
+                // Ici, tu peux ajouter des actions supplémentaires si nécessaire
+            });
+        {% endfor %}
+    </script>
+{% endblock %}

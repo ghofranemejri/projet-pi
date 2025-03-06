@@ -1,0 +1,65 @@
+{% extends 'baseback.html.twig' %}
+
+{% block title %}Modifier une Traitement{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0" style="margin-bottom:3%;">Modifier une Traitement</h5>
+        </div><br><br>
+        <div class="card-body">
+            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Medicament</label>
+                    {{ form_widget(form.medicament, {'attr': {'class': 'form-control' ~ (form.vars.submitted and form.medicament.vars.errors|length > 0  ? ' is-invalid' : '')}}) }}
+                    {% if form.vars.submitted %}
+                        {% for error in form.medicament.vars.errors %}
+                            <div class="invalid-feedback">{{ error.message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Dose</label>
+                    {{ form_widget(form.dose, {'attr': {'class': 'form-control' ~ (form.vars.submitted and form.dose.vars.errors|length > 0  ? ' is-invalid' : '')}}) }}
+                    {% if form.vars.submitted %}
+                        {% for error in form.dose.vars.errors %}
+                            <div class="invalid-feedback">{{ error.message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form.description.vars.errors|length > 0  ? ' is-invalid' : '')}}) }}
+                {% if form.vars.submitted %}
+                    {% for error in form.description.vars.errors %}
+                        <div class="invalid-feedback">{{ error.message }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ path('prescription_index') }}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" class="btn btn-success">Modifier</button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+<script>
+// Désactiver le comportement de validation par défaut de Bootstrap
+document.querySelector('form.needs-validation').addEventListener('submit', function(event) {
+    // Empêche le comportement par défaut de Bootstrap
+    event.preventDefault();
+    // Forcer l'envoi du formulaire même avec des erreurs
+    this.submit();
+}, false);
+
+</script>
+{% endblock %}
