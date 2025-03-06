@@ -1,0 +1,32 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Edit Product{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Edit Product</h1>
+    
+    <form method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="prix" class="form-label">Prix</label>
+            <input type="number" step="0.01" class="form-control" id="prix" name="prix" value="{{ product.prix }}" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="quantite" class="form-label">Quantité</label>
+            <input type="number" class="form-control" id="quantite" name="quantite" value="{{ product.quantite }}" required>
+        </div>
+        
+        <div class="mb-3">
+            <label for="image" class="form-label">Image</label>
+            {% if product.image %}
+                <img src="{{ asset(product.image) }}" alt="Current image" style="max-width: 200px" class="d-block mb-2">
+            {% endif %}
+            <input type="file" class="form-control" id="image" name="image">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Update</button>
+        <a href="{{ path('app_products_index') }}" class="btn btn-secondary">Back to list</a>
+    </form>
+</div>
+{% endblock %}

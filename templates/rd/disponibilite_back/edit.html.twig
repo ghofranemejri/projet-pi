@@ -1,0 +1,29 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Édit de Disponibilité{% endblock %}
+
+{% block content %}
+    <div class="container my-4">
+        <h1 class="mb-4">Modifier la Disponibilité</h1>
+
+        <!-- Insertion du formulaire d'édition avec un label personnalisé pour le bouton -->
+        {{ include('disponibilite_back/_form.html.twig', {'form': form, 'button_label': 'Mettre à jour'}) }}
+
+        <div class="mt-3">
+            <!-- Bouton "Back to list" avec emoji ➡️ -->
+            <a href="{{ path('app_disponibilite_index_back') }}" class="btn btn-secondary">
+                ➡️ Retour à la liste
+            </a>
+        </div>
+
+        <div class="mt-3">
+            <!-- Formulaire pour supprimer la disponibilité -->
+            <form method="post" action="{{ path('app_disponibilite_delete_back', {'id': disponibilite.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet élément ?');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ disponibilite.id) }}">
+                <button class="btn btn-danger">
+                    🗑️ Supprimer
+                </button>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    
+    <title>{% block title %}Dashboard - eConsult+{% endblock %}</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Favicons -->
+    <link href="{{ asset('back/img/favicon.png') }}" rel="icon">
+    <link href="{{ asset('back/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="{{ asset('back/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('back/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ asset('back/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('back/vendor/quill/quill.snow.css') }}" rel="stylesheet">
+    <link href="{{ asset('back/vendor/quill/quill.bubble.css') }}" rel="stylesheet">
+    <link href="{{ asset('back/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
+    <link href="{{ asset('back/vendor/simple-datatables/style.css') }}" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="{{ asset('back/css/style.css') }}" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- ======= Header ======= -->
+    <header id="header" class="header fixed-top d-flex align-items-center">
+
+        <div class="d-flex align-items-center justify-content-between">
+                <img src="{{ asset('back/img/logo.png') }}" alt="">
+                <span class="d-none d-lg-block">eConsult+</span>
+            <i class="bi bi-list toggle-sidebar-btn"></i>
+        </div><!-- End Logo -->
+{# 
+        //<div class="search-bar">
+            <form class="search-form d-flex align-items-center" method="POST" action="#">
+                <input type="text" name="query" placeholder="Search" title="Enter search keyword">
+                <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+            </form>
+        </div><!-- End Search Bar --> #}
+
+        <nav class="header-nav ms-auto">
+            <ul class="d-flex align-items-center">
+                <li class="nav-item d-block d-lg-none">
+                    <a class="nav-link nav-icon search-bar-toggle " href="#">
+                        <i class="bi bi-search"></i>
+                    </a>
+                </li><!-- End Search Icon-->
+                {% block header_nav %}{% endblock %}
+            </ul>
+        </nav><!-- End Icons Navigation -->
+
+    </header><!-- End Header -->
+
+    <!-- ======= Sidebar ======= -->
+    <aside id="sidebar" class="sidebar">
+        <ul class="sidebar-nav" id="sidebar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('adminn_dashboard') }}">
+                    <i class="bi bi-grid"></i>
+                    <span>Dashboard</span>
+                </a> <li class="nav-item">
+       
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_products_index') }}">
+          <i class="bi bi-box"></i>
+          <span>Products</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_order_indexx') }}">
+          <i class="bi bi-cart"></i>
+          <span>Orders</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_consultation_index') }}">
+          <i class="bi bi-calendar-check"></i>
+          <span>Consultations</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_fiche_index') }}">
+          <i class="bi bi-file-text"></i>
+          <span>Fiches Médicales</span>
+        </a>
+      </li>
+       <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_form_back_index') }}">
+          <i class="bi bi-pen"></i>
+          <span>Form</span>
+        </a>
+      </li>
+       <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_disponibilite_index') }}">
+          <i class="bi bi-clock"></i>
+          <span>Disponibilité</span>
+        </a>
+      </li>
+       <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_rendez_vous_index_back') }}">
+          <i class="bi bi-calendar"></i>
+          <span>Rendez Vous</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ path('messenger_admin') }}">
+          <i class="bi bi-messenger"></i>
+          <span>Chat</span>
+        </a>
+      </li>
+            <li class="nav-item">
+        <a class="nav-link" href="{{ path('traitement_index') }}">
+          <i class="bi bi-book"></i>
+          <span>Traitement</span>
+        </a>
+      </li>
+       </li>
+            <li class="nav-item">
+        <a class="nav-link" href="{{path('prescription_new')}}">
+          <i class="bi bi-open"></i>
+          <span>Préscription</span>
+        </a>
+      </li>
+      <!-- End Dashboard Nav -->
+
+            <li class="nav-heading">Pages</li>
+
+            <li class="nav-item">
+                <a class="nav-link collapsed" href="{{ path('admin') }}">
+                    <i class="bi bi-person"></i>
+                    <span>Liste des utilisateurs</span>
+                </a>
+
+                 {% if app.user %}
+            <li><a href="{{ path('app_logout') }}" class="cta-btn btn-danger">Logout</a></li>
+        {% endif %}
+            </li><!-- End User List Nav -->
+
+            
+    </aside><!-- End Sidebar -->
+
+    <main id="main" class="main">
+        {% block content %}{% endblock %}
+    </main><!-- End Main Content -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer" class="footer">
+        <div class="copyright">
+            &copy; Copyright <strong><span>eConsult+</span></strong>. All Rights Reserved
+        </div>
+        <div class="credits">
+            Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+        </div>
+    </footer><!-- End Footer -->
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<script src="{{ asset('admin/assets/js/main.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function checkStockAlert() {
+        fetch('/api/stock/alertes')
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    let message = " ⚠️ Faible quantité :\n";
+                    data.forEach(produit => {
+                        message += `🚨${produit.nom} (Qté: ${produit.quantite})\n`;
+                    });
+
+                    Swal.fire({
+                        title: "Alerte Stock !",
+                        text: message,
+                        icon: "warning",
+                        confirmButtonText: "OK"
+                    });
+                }
+            })
+            .catch(error => console.error('Erreur API:', error));
+    }
+
+    // Vérifie toutes les 10 secondes
+    setInterval(checkStockAlert, 10000);
+</script>
+    <!-- Vendor JS Files -->
+    <script src="{{ asset('back/vendor/apexcharts/apexcharts.min.js') }}"></script>
+    <script src="{{ asset('back/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('back/vendor/chart.js/chart.umd.js') }}"></script>
+    <script src="{{ asset('back/vendor/echarts/echarts.min.js') }}"></script>
+    <script src="{{ asset('back/vendor/quill/quill.js') }}"></script>
+    <script src="{{ asset('back/vendor/simple-datatables/simple-datatables.js') }}"></script>
+    <script src="{{ asset('back/vendor/tinymce/tinymce.min.js') }}"></script>
+    <script src="{{ asset('back/vendor/php-email-form/validate.js') }}"></script>
+
+    <!-- Template Main JS File -->
+    <script src="{{ asset('back/js/main.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

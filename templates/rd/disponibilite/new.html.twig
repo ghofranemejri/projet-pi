@@ -1,0 +1,11 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}New Disponibilite{% endblock %}
+
+{% block content%}
+    <h1>Create new Disponibilite</h1>
+
+    {{ include('rd/disponibilite/_form.html.twig') }}
+
+    <a href="{{ path('app_disponibilite_index') }}">back to list</a>
+{% endblock %}

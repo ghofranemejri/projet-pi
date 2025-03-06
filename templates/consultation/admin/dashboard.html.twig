@@ -1,0 +1,141 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .stat-card {
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card stat-card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class="bi bi-calendar-check"></i> 
+                        Aujourd'hui
+                    </h5>
+                    <h2 class="display-4">{{ stats.todayConsultations }}</h2>
+                    <p class="text-muted mb-0">consultations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card stat-card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class="bi bi-calendar-month"></i> 
+                        Total
+                    </h5>
+                    <h2 class="display-4">{{ stats.totalConsultations }}</h2>
+                    <p class="text-muted mb-0">consultations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-pie-chart-fill text-primary"></i> 
+                        Patients les plus fréquents
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="patientsChart" width="400" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-list-ul text-primary"></i>
+                        Détails des patients
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th class="text-end">Consultations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for patient in frequent_patients %}
+                                    <tr>
+                                        <td>{{ patient.name }}</td>
+                                        <td class="text-end">
+                                            <span class="badge bg-primary rounded-pill">
+                                                {{ patient.consultation_count }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('patientsChart').getContext('2d');
+            
+            const data = {
+                labels: [
+                    {% for patient in frequent_patients %}
+                        '{{ patient.name }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    data: [
+                        {% for patient in frequent_patients %}
+                            {{ patient.consultation_count }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        '#4e73df',
+                        '#1cc88a',
+                        '#36b9cc',
+                        '#f6c23e',
+                        '#e74a3b'
+                    ]
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

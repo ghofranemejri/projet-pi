@@ -1,27 +1,54 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Connexion</h1>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4">
+                <h1 class="text-center">Connexion</h1>
 
-    {% if error %}
-        <div class="alert alert-danger">
-            {{ error.messageKey|trans(error.messageData, 'security') }}
+                {% if error %}
+                    <div class="alert alert-danger">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                <form id="login-form" method="post">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                    <input type="hidden" id="recaptchaToken" name="recaptchaToken">
+
+                    <div class="mb-3">
+                        <label for="inputEmail" class="form-label">Email</label>
+                        <input type="email" id="inputEmail" name="_username" class="form-control" value="{{ last_username }}" required autofocus>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="inputPassword" class="form-label">Mot de passe</label>
+                        <input type="password" id="inputPassword" name="_password" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="g-recaptcha" data-sitekey="{{ google_recaptcha_site_key }}"></div>
+                        {{ google_recaptcha_site_key }}
+                        
+   
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                </form>
+            </div>
         </div>
-    {% endif %}
+    </div>
+</div>
 
-    <form method="post">
-    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+<script>
+    grecaptcha.ready(function() {
+        grecaptcha.execute('{{ google_recaptcha_site_key }}', {action: 'submit'}).then(function(token) {
+            document.getElementById('recaptcha-token').value = token;
+        });
+    });
+</script>
 
-        <div class="form-group">
-            <label for="inputEmail">Email</label>
-            <input type="email" id="inputEmail" name="_username" value="{{ last_username }}" required autofocus>
-        </div>
+<input type="hidden" name="recaptcha_token" id="recaptcha-token">
 
-        <div class="form-group">
-            <label for="inputPassword">Mot de passe</label>
-            <input type="password" id="inputPassword" name="_password" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Se connecter</button>
-    </form>
 {% endblock %}

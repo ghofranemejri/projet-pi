@@ -1,0 +1,14 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}{% if form.vars.value.id %}Modifier{% else %}Créer{% endif %} un utilisateur{% endblock %}
+
+{% block content %}
+    <h1>{% if form.vars.value.id %}Modifier{% else %}Créer{% endif %} un utilisateur</h1>
+
+    {{ form_start(form) }}
+    {{ form_widget(form) }}
+    <button class="btn btn-primary">{% if form.vars.value.id %}Modifier{% else %}Créer{% endif %}</button>
+    {{ form_end(form) }}
+
+ <a href="{{ path('admin') }}">Retour à la liste</a>
+ {% endblock %}

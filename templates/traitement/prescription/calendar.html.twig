@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Prescription Calendar {% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1 class="text-center">Prescription Calendar</h1>
+        <div class="calendar-container mx-auto shadow p-3 bg-white rounded">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <!-- FullCalendar Library -->
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js"></script>
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    if (!window.FullCalendar) {
+        console.error('FullCalendar is not loaded. Check the script URL.');
+        return;
+    }
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: '/prescription/api/prescriptions', // Fetch data from API
+        eventClick: function(info) {
+            alert('Prescription Details:\n' +
+                  'Patient ID: ' + info.event.title.split(" ")[2] + '\n' +
+                  'Start: ' + info.event.start.toISOString().slice(0, 19).replace('T', ' ') + '\n' +
+                  'End: ' + info.event.end.toISOString().slice(0, 19).replace('T', ' ') + '\n' +
+                  'Address: ' + info.event.extendedProps.address);
+        }
+    });
+
+    calendar.render();
+});
+
+    </script>
+
+    <style>
+        .calendar-container {
+            max-width: 900px; 
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+    </style>
+
+{% endblock %}

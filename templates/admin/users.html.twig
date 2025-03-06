@@ -1,6 +1,6 @@
-{% extends 'base.html.twig' %}
+{% extends 'base2.html.twig' %}
 
-{% block body %}
+{% block content %}
     <h1>Gestion des utilisateurs</h1>
     <table>
         <tr>
@@ -14,13 +14,18 @@
                 <td>{{ user.id }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ user.roles|join(', ') }}</td>
+               <!---
                 <td>
                     {% if 'ROLE_MEDECIN' not in user.roles %}
                         <a href="{{ path('admin_user_promote', {'id': user.id, 'role': 'ROLE_MEDECIN'}) }}" class="btn btn-warning">Promote to Doctor</a>
                     {% endif %}
+                    {% if 'ROLE_PATIENT' not in user.roles %}
+                        <a href="{{ path('admin_user_promote', {'id': user.id, 'role': 'ROLE_PATIENT'}) }}" class="btn btn-warning">Promote to Patient</a>
                     {% if 'ROLE_ADMIN' not in user.roles %}
+                    {% endif %}
                         <a href="{{ path('admin_user_promote', {'id': user.id, 'role': 'ROLE_ADMIN'}) }}" class="btn btn-danger">Promote to Admin</a>
                     {% endif %}
+                --!>
                 </td>
             </tr>
         {% endfor %}

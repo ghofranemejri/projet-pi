@@ -1,0 +1,216 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .stat-card {
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="pagetitle">
+        <h1>Dashboard</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Home</a></li>
+                <li class="breadcrumb-item active">Dashboard</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section dashboard">
+        <div class="row">
+            <!-- Today's Consultations -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card info-card sales-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Consultations <span>| Aujourd'hui</span></h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-calendar-check"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>{{ stats.todayConsultations }}</h6>
+                                <span class="text-success small pt-1 fw-bold">Consultations aujourd'hui</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Consultations -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card info-card revenue-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Consultations <span>| Total</span></h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-journal-medical"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>{{ stats.totalConsultations }}</h6>
+                                <span class="text-primary small pt-1 fw-bold">Total consultations</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Fiches -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card info-card customers-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Fiches <span>| Aujourd'hui</span></h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>{{ stats.todayFiches }}</h6>
+                                <span class="text-success small pt-1 fw-bold">Fiches aujourd'hui</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Fiches -->
+            <div class="col-xxl-3 col-md-6">
+                <div class="card info-card sales-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Fiches <span>| Total</span></h5>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-files"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h6>{{ stats.totalFiches }}</h6>
+                                <span class="text-primary small pt-1 fw-bold">Total fiches</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Patient Statistics -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Statistiques des Patients <span>| Top 5</span></h5>
+                        <div class="chart-container">
+                            <canvas id="patientsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Recent Consultations -->
+            <div class="col-12">
+                <div class="card recent-sales overflow-auto">
+                    <div class="card-body">
+                        <h5 class="card-title">Consultations Récentes</h5>
+
+                        <table class="table table-borderless datatable">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Patient</th>
+                                    <th scope="col">Médecin</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for consultation in consultations %}
+                                    <tr>
+                                        <th scope="row"><a href="{{ path('app_consultation_show', {'id': consultation.id}) }}">#{{ consultation.id }}</a></th>
+                                        <td>{{ consultation.nomPatient }}</td>
+                                        <td>{{ consultation.nomMedecin }}</td>
+                                        <td>{{ consultation.dateConsultation ? consultation.dateConsultation|date('d/m/Y H:i') : '' }}</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ path('app_consultation_show', {'id': consultation.id}) }}" class="btn btn-info btn-sm">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{{ path('app_consultation_edit', {'id': consultation.id}) }}" class="btn btn-warning btn-sm">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">Aucune consultation trouvée</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('patientsChart').getContext('2d');
+            
+            const data = {
+                labels: [
+                    {% for patient in frequent_patients %}
+                        '{{ patient.name }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Nombre de consultations',
+                    data: [
+                        {% for patient in frequent_patients %}
+                            {{ patient.consultation_count }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        'rgba(78, 115, 223, 0.8)',
+                        'rgba(28, 200, 138, 0.8)',
+                        'rgba(54, 185, 204, 0.8)',
+                        'rgba(246, 194, 62, 0.8)',
+                        'rgba(231, 74, 59, 0.8)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

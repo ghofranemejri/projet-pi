@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Rendez-Vous</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .no-data {
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* Style pour la table quand il n'y a pas de données */
+        .no-records {
+            font-weight: bold;
+            color: #888;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Liste des Rendez-Vous</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Motif</th>
+                <th>Patient</th>
+                <th>Médecin</th>
+                <th>Date de Création</th> <!-- Ajout de la colonne Date de création -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for rendez_vou in rendez_vouses %}
+                <tr>
+                    <td>{{ rendez_vou.id }}</td>
+                    <td>{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d') : 'Non précisée' }}</td>
+                    <td>{{ rendez_vou.statut }}</td>
+                    <td>{{ rendez_vou.motif }}</td>
+                    <td>{{ rendez_vou.patient ? rendez_vou.patient.email : 'N/A' }}</td>
+                    <td>{{ rendez_vou.medecin ? rendez_vou.medecin.email : 'N/A' }}</td>
+                    <td>{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d') : 'Non précisée' }}</td> <!-- Ajout de la date de création -->
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="7" class="no-records">Aucun rendez-vous trouvé</td> <!-- La colonne s'étend sur 7 au lieu de 6 -->
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultats de la recherche{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">🔍 Résultats de la recherche</h1>
+
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{{ path('app_form_post_index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour aux posts
+        </a>
+    </div>
+
+    {% set query = query|default('') %}
+
+    <!--<form method="get" action="{{ path('app_form_post_search') }}" class="mb-4">
+        <input type="text" name="q" class="form-control d-inline-block w-50" placeholder="Rechercher un post..." value="{{ query }}">
+        <button type="submit" class="btn btn-secondary">Rechercher</button>
+    </form>-->
+    <input type="text" id="search" class="form-control mb-3" placeholder="Rechercher un post...">
+
+<div id="results">
+    {% for form_post in form_posts %}
+        <div class="col-md-8 offset-md-2 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold">{{ form_post.nom }}</h5>
+                    <h6 class="text-muted">Ajouté à la date : {{ form_post.date ? form_post.date|date('Y-m-d H:i:s') : 'N/A' }}</h6>
+                    <p class="card-text">{{ form_post.description }}</p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-md-8 offset-md-2">
+            <p class="text-muted text-center">Aucun post trouvé.</p>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+document.getElementById('search').addEventListener('input', function() {
+    let query = this.value;
+
+    fetch('/recherche?q=' + encodeURIComponent(query))
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('results').innerHTML = html;
+        });
+});
+</script>
+
+
+    <div class="row">
+        {% for form_post in form_posts %}
+            <div class="col-md-8 offset-md-2 mb-4">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title fw-bold">{{ form_post.nom }}</h5>
+                        <h6 class="text-muted">Ajouté à la date : {{ form_post.date ? form_post.date|date('Y-m-d H:i:s') : 'N/A' }}</h6>
+                        <p class="card-text">{{ form_post.description }}</p>
+
+                        <div class="d-flex align-items-center">
+                            <a href="{{ path('app_form_post_edit', {'id': form_post.id}) }}" class="text-warning me-3">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" class="text-danger delete-btn me-3" 
+                               data-url="{{ path('app_form_post_delete', {'id': form_post.id}) }}"
+                               data-token="{{ csrf_token('delete' ~ form_post.id) }}">
+                                <i class="fas fa-trash-alt"></i>
+                            </a>
+                            <a href="#" class="text-secondary comment-btn" data-id="{{ form_post.id }}">
+                                <i class="fas fa-comment"></i> (<span id="comment-count-{{ form_post.id }}">{{ form_post.reponses|length }}</span>)
+                            </a>
+                        </div>
+
+                        <!-- Comment Section -->
+                        <div class="comments-section mt-3" id="comments-{{ form_post.id }}" style="display: none;">
+                            <h6>Commentaires (<span id="comment-count-section-{{ form_post.id }}">{{ form_post.reponses|length }}</span>)</h6>
+                            <div class="comments-list" id="comments-list-{{ form_post.id }}">
+                                {% for reponse in form_post.reponses %}
+                                    <div class="comment bg-light p-2 rounded mb-2">{{ reponse.contenu }}</div>
+                                {% endfor %}
+                            </div>
+                            <textarea class="form-control mb-2 comment-text" placeholder="Ajoutez un commentaire..."></textarea>
+                            <button class="btn btn-sm btn-primary add-comment" 
+                                    data-id="{{ form_post.id }}"
+                                    data-url="{{ path('app_reponse_new') }}"
+                                    data-token="{{ csrf_token('add_comment' ~ form_post.id) }}">
+                                Ajouter un commentaire
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-md-8 offset-md-2">
+                <p class="text-muted text-center">Aucun post trouvé pour "{{ query }}".</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- SweetAlert for delete confirmation -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('.comment-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            let postId = this.getAttribute('data-id');
+            let commentSection = document.getElementById('comments-' + postId);
+            commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+
+    document.querySelectorAll('.add-comment').forEach(button => {
+        button.addEventListener('click', function () {
+            let postId = this.getAttribute('data-id');
+            let url = this.getAttribute('data-url');
+            let token = this.getAttribute('data-token');
+            let textarea = document.querySelector('#comments-' + postId + ' .comment-text');
+            let commentText = textarea.value.trim();
+
+            if (!commentText) return;
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ contenu: commentText, formPostId: postId, _token: token })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let commentDiv = document.createElement('div');
+                    commentDiv.classList.add('comment', 'bg-light', 'p-2', 'rounded', 'mb-2');
+                    commentDiv.textContent = commentText;
+
+                    let commentsList = document.getElementById('comments-list-' + postId);
+                    commentsList.appendChild(commentDiv);
+
+                    let commentCount = document.getElementById('comment-count-' + postId);
+                    let commentSectionCount = document.getElementById('comment-count-section-' + postId);
+                    commentCount.textContent = parseInt(commentCount.textContent) + 1;
+                    commentSectionCount.textContent = parseInt(commentSectionCount.textContent) + 1;
+
+                    textarea.value = '';
+                } else {
+                    Swal.fire("Erreur", "Impossible d'ajouter le commentaire.", "error");
+                }
+            })
+            .catch(() => Swal.fire("Erreur", "Une erreur est survenue.", "error"));
+        });
+    });
+});
+</script>
+
+{% endblock %}

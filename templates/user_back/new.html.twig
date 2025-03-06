@@ -1,0 +1,25 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}{% if form.vars.value.id %}Modifier{% else %}Créer{% endif %} un utilisateur{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="mb-4">{% if form.vars.value.id %}Modifier{% else %}Créer{% endif %} un utilisateur</h1>
+
+        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+        
+        <div class="form-group mb-3">
+            {{ form_widget(form) }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-lg btn-block">
+            {% if form.vars.value.id %}Modifier{% else %}Créer{% endif %}
+        </button>
+        
+        {{ form_end(form) }}
+
+        <div class="mt-4">
+            <a href="{{ path('admin') }}" class="btn btn-secondary">Retour à la liste</a>
+        </div>
+    </div>
+{% endblock %}

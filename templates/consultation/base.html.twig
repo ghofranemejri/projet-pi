@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>{% block title %}Welcome to eConsult+{% endblock %}</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+
+    <!-- Favicons -->
+    <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
+    <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+
+    <!-- Template Main CSS File -->
+    <link href="{{ asset('assets/css/main.css') }}" rel="stylesheet">
+
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+    <!-- Top Bar -->
+    <header id="header" class="header sticky-top">
+        <div class="topbar d-flex align-items-center">
+            <div class="container d-flex justify-content-center justify-content-md-between">
+                <div class="contact-info d-flex align-items-center">
+                    <i class="bi bi-envelope d-flex align-items-center"><a href="mailto:salim.maatali@esprit.tn">salim.maatali@esprit.tn</a></i>
+                    <i class="bi bi-phone d-flex align-items-center ms-4"><span>+216 99 802 182</span></i>
+                </div>
+                <div class="social-links d-none d-md-flex align-items-center">
+                    <a href="#" class="twitter"><i class="bi bi-twitter-x"></i></a>
+                    <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="branding d-flex align-items-center">
+            <div class="container position-relative d-flex align-items-center justify-content-between">
+                <a href="{{ path('app_home') }}" class="logo d-flex align-items-center me-auto">
+                    <h1 class="sitename">eConsult+</h1>
+                </a>
+
+                <nav id="navmenu" class="navmenu">
+                    <ul>
+                        {% block navigation %}
+                        <li><a href="{{ path('app_home') }}" class="active">Home</a></li>
+                        <li><a href="#about">User</a></li>
+                        <li><a href="#services">Consultation</a></li>
+                        <li><a href="#departments">Paiement</a></li>
+                        <li><a href="#doctors">Historique</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        {% endblock %}
+                    </ul>
+                    <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+                </nav>
+
+                <a class="cta-btn d-none d-sm-block" href="#appointment">Faire Consultation</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        {% block body %}{% endblock %}
+    </main>
+
+    <footer id="footer" class="footer light-background">
+        <div class="container footer-top">
+            <div class="row gy-4">
+                <div class="col-lg-5 col-md-12 footer-about">
+                    <a href="{{ path('app_home') }}" class="logo d-flex align-items-center">
+                        <h3>eConsult+</h3>
+                    </a>
+                    <p>Une plateforme de consultation en ligne qui met en relation les utilisateurs avec des experts de différents domaines.</p>
+                </div>
+
+                <div class="col-lg-3 col-md-6 footer-links">
+                    <h4>Liens Utiles</h4>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">About us</a></li>
+                        <li><a href="#">Services</a></li>
+                        <li><a href="#">Terms of service</a></li>
+                        <li><a href="#">Privacy policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-4 col-md-6 footer-contact">
+                    <h4>Contact Us</h4>
+                    <p>Tunis, Tunisia</p>
+                    <p>Email: salim.maatali@esprit.tn</p>
+                    <p>Phone: +216 99 802 182</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="container copyright text-center mt-4">
+            <p>&copy; <span>Copyright</span> <strong class="px-1">eConsult+</strong> <span>All Rights Reserved</span></p>
+        </div>
+    </footer>
+
+    <!-- Vendor JS Files -->
+    <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+    <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+    
+    <!-- Template Main JS File -->
+    <script src="{{ asset('assets/js/main.js') }}"></script>
+
+    {% block javascripts %}
+        {% block importmap %}{{ importmap('app') }}{% endblock %}
+    {% endblock %}
+</body>
+</html>

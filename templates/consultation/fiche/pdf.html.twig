@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fiche Médicale - {{ fiche.nomPatient }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #bdc3c7;
+            padding-bottom: 5px;
+        }
+        .info-row {
+            margin-bottom: 10px;
+        }
+        .label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .value {
+            color: #2c3e50;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="title">Fiche Médicale</div>
+        <div class="subtitle">eConsult+</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Informations Patient</div>
+        <div class="info-row">
+            <span class="label">Nom du Patient:</span>
+            <span class="value">{{ fiche.nomPatient }}</span>
+        </div>
+        <div class="info-row">
+            <span class="label">Date:</span>
+            <span class="value">{{ fiche.date ? fiche.date|date('d/m/Y') : '' }}</span>
+        </div>
+        <div class="info-row">
+            <span class="label">Médecin:</span>
+            <span class="value">{{ fiche.nomMedecin }}</span>
+        </div>
+    </div>
+
+    {% if fiche.motif %}
+    <div class="section">
+        <div class="section-title">Motif de Consultation</div>
+        <div class="value">{{ fiche.motif }}</div>
+    </div>
+    {% endif %}
+
+    {% if fiche.diagnostic %}
+    <div class="section">
+        <div class="section-title">Diagnostic</div>
+        <div class="value">{{ fiche.diagnostic }}</div>
+    </div>
+    {% endif %}
+
+    {% if fiche.traitement %}
+    <div class="section">
+        <div class="section-title">Traitement</div>
+        <div class="value">{{ fiche.traitement }}</div>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Document généré le {{ "now"|date('d/m/Y H:i') }}</p>
+        <p>eConsult+ - Système de Gestion des Consultations Médicales</p>
+    </div>
+</body>
+</html>

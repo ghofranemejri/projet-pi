@@ -1,0 +1,47 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Nouvelle Consultation{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="card-title">Nouvelle Consultation</h1>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                            <div class="mb-3">
+                                {{ form_label(form.nomMedecin) }}
+                                {{ form_widget(form.nomMedecin) }}
+                                {{ form_errors(form.nomMedecin) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.nomPatient) }}
+                                {{ form_widget(form.nomPatient) }}
+                                {{ form_errors(form.nomPatient) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.dateConsultation) }}
+                                {{ form_widget(form.dateConsultation) }}
+                                {{ form_errors(form.dateConsultation) }}
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ path('app_consultation_index') }}" class="btn btn-secondary me-md-2">
+                                    <i class="bi bi-arrow-left"></i> Retour
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Enregistrer
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Order Details #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Order Details #{{ order.id }}</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Order #{{ order.id }}</h5>
+            <p class="card-text"><strong>User:</strong> {{ order.user.email }}</p>
+            <p class="card-text"><strong>Product:</strong> {{ order.product.id}}</p>
+            <p class="card-text"><strong>Quantity:</strong> {{ order.quantite }}</p>
+            <p class="card-text"><strong>Total Price:</strong> ${{ order.prixTotal }}</p>
+            <p class="card-text"><strong>Order Date:</strong> {{ order.dateCommande|date('Y-m-d H:i:s') }}</p>
+            <p class="card-text">
+                <strong>Status:</strong>
+                <span class="badge 
+                    {% if order.statut == 'en attente' %}bg-warning
+                    {% elseif order.statut == 'traite' %}bg-success
+                    {% else %}bg-danger
+                    {% endif %}">
+                    {{ order.statut }}
+                </span>
+            </p>
+            <a href="{{ path('app_order_indexx') }}" class="btn btn-secondary">Back to list</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

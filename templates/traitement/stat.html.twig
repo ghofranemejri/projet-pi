@@ -1,0 +1,114 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1 class="text-center">📊 Admin Dashboard</h1>
+
+    <!-- Dropdown for Selecting Charts -->
+    <div class="mb-3 text-center">
+        <label for="chartSelector" class="form-label"><strong>📊 Select a Chart:</strong></label>
+        <select id="chartSelector" class="form-control w-50 mx-auto">
+            <option value="prescriptionChart">Prescriptions vs. Treatments</option>
+            <option value="medicationChart">Most Prescribed Medications</option>
+            <option value="treatmentChart">Treatments by Dosage Ranges</option>
+        </select>
+    </div>
+
+    <!-- Chart Containers -->
+    <div class="chart-container d-flex justify-content-center">
+        <canvas id="prescriptionChart" class="chart visible"></canvas>
+        <canvas id="medicationChart" class="chart"></canvas>
+        <canvas id="treatmentChart" class="chart"></canvas>
+    </div>
+</div>
+
+<!-- Style for Smoother Transition and Size Reduction -->
+<style>
+    /* Center Charts */
+    .chart-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 400px;
+    }
+
+    .chart {
+        max-width: 400px !important; /* Limit chart size */
+        max-height: 400px !important;
+        width: 100%;
+        height: 100%;
+        opacity: 0; /* Initially hidden */
+        transform: scale(0.8);
+        transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+        position: absolute;
+    }
+
+    .visible {
+        opacity: 1;
+        transform: scale(1);
+    }
+</style>
+
+<!-- Chart.js Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Initialize Charts
+        var ctx1 = document.getElementById('prescriptionChart').getContext('2d');
+        var prescriptionChart = new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                labels: ['Prescriptions', 'Treatments'],
+                datasets: [{
+                    data: [{{ totalPrescriptions }}, {{ totalTreatments }}],
+                    backgroundColor: ['#007bff', '#28a745']
+                }]
+            }
+        });
+
+        var ctx2 = document.getElementById('medicationChart').getContext('2d');
+        var medicationChart = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: {{ medicationLabels|raw }},
+                datasets: [{
+                    label: 'Number of Prescriptions',
+                    data: {{ medicationCounts|raw }},
+                  backgroundColor: ['#36a2eb', '#ffcc00', '#ff6384', '#8a2be2'] 
+                }]
+            }
+        });
+
+        var ctx3 = document.getElementById('treatmentChart').getContext('2d');
+        var treatmentChart = new Chart(ctx3, {
+            type: 'doughnut',
+            data: {
+                labels: {{ dosageLabels|raw }},
+                datasets: [{
+                    data: {{ dosageCounts|raw }},
+              backgroundColor: ['#36a2eb', '#ffcc00', '#ff6384', '#8a2be2'] 
+                }]
+            }
+        });
+
+        // Function to Show Selected Chart with Smooth Animation
+        document.getElementById('chartSelector').addEventListener('change', function () {
+            var selectedChart = this.value;
+            var charts = document.querySelectorAll('.chart');
+
+            charts.forEach(chart => {
+                if (chart.id === selectedChart) {
+                    chart.classList.add('visible');
+                } else {
+                    chart.classList.remove('visible');
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{% endblock %}

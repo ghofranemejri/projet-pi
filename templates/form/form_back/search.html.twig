@@ -1,0 +1,118 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}FormPost Index{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">📋 FormPost Index</h1>
+
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{{ path('app_form_back_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Créer un nouveau post
+        </a>
+    </div>
+
+    <!-- Barre de recherche et de tri -->
+    <div class="mb-3 d-flex gap-2">
+        <input type="text" id="search" class="form-control" placeholder="Rechercher par nom ou description...">
+        <select id="sort" class="form-select">
+            <option value="">Trier par...</option>
+            <option value="name">Nom</option>
+            <option value="date">Date</option>
+            <option value="comments">Nombre de commentaires</option>
+        </select>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="posts-table">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Commentaires</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="posts-body">
+                {% for form_post in pagination %}
+                    <tr class="post-row">
+                        <td>{{ loop.index }}</td>
+                        <td class="post-name">{{ form_post.nom }}</td>
+                        <td class="post-date">{{ form_post.date ? form_post.date|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                        <td class="post-description">{{ form_post.description }}</td>
+                        <td class="post-comments" data-count="{{ form_post.reponses|length }}">
+                            <button class="btn btn-sm btn-secondary comment-btn" data-id="{{ form_post.id }}">
+                                <i class="fas fa-comment"></i> ({{ form_post.reponses|length }})
+                            </button>
+                        </td>
+                        <td>
+                            <a href="{{ path('app_form_back_edit', {'id': form_post.id}) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <button class="btn btn-sm btn-danger delete-btn"
+                                data-url="{{ path('app_form_back_delete', {'id': form_post.id}) }}"
+                                data-token="{{ csrf_token('delete' ~ form_post.id) }}">
+                                <i class="fas fa-trash-alt"></i> Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Aucun enregistrement trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination placée en dehors de la boucle -->
+    <div class="d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let searchInput = document.getElementById('search');
+    let sortSelect = document.getElementById('sort');
+    let tableBody = document.getElementById('posts-body');
+    let rows = Array.from(tableBody.querySelectorAll('.post-row'));
+
+    function filterAndSort() {
+        let searchQuery = searchInput.value.toLowerCase();
+        let sortBy = sortSelect.value;
+
+        let filteredRows = rows.filter(row => {
+            let name = row.querySelector('.post-name').textContent.toLowerCase();
+            let description = row.querySelector('.post-description').textContent.toLowerCase();
+            return name.includes(searchQuery) || description.includes(searchQuery);
+        });
+
+        if (sortBy === 'name') {
+            filteredRows.sort((a, b) => {
+                return a.querySelector('.post-name').textContent.localeCompare(b.querySelector('.post-name').textContent);
+            });
+        } else if (sortBy === 'date') {
+            filteredRows.sort((a, b) => {
+                let dateA = new Date(a.querySelector('.post-date').textContent || '1970-01-01');
+                let dateB = new Date(b.querySelector('.post-date').textContent || '1970-01-01');
+                return dateB - dateA;
+            });
+        } else if (sortBy === 'comments') {
+            filteredRows.sort((a, b) => {
+                return b.querySelector('.post-comments').dataset.count - a.querySelector('.post-comments').dataset.count;
+            });
+        }
+
+        tableBody.innerHTML = "";
+        filteredRows.forEach(row => tableBody.appendChild(row));
+    }
+
+    searchInput.addEventListener('keyup', filterAndSort);
+    sortSelect.addEventListener('change', filterAndSort);
+});
+</script>
+{% endblock %}

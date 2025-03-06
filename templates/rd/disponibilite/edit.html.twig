@@ -1,0 +1,13 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Edit Disponibilite{% endblock %}
+
+{% block content %}
+    <h1>Edit Disponibilite</h1>
+
+    {{ include('rd/disponibilite/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_disponibilite_index') }}">back to list</a>
+
+    {{ include('rd/disponibilite/_delete_form.html.twig') }}
+{% endblock %}

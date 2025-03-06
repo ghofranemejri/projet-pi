@@ -1,0 +1,51 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Products List{% endblock %}
+
+{% block content %}
+<section class="inner-page" style="margin-top: 100px;">
+    <div class="container mt-4">
+        <div class="section-title">
+            <h2>Our Products</h2>
+            <p>Browse our collection of quality products</p>
+        </div>
+
+        <div class="row">
+            {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        {% if product.image %}
+                            <img src="{{ asset(product.image) }}" class="card-img-top" alt="Product" style="height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">Product #{{ product.id }}</h5>
+                            <p class="card-text">
+                                <strong>Price:</strong> ${{ product.prix }}<br>
+                                <strong>Stock:</strong> {{ product.quantite }}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ path('app_products_show', {'id': product.id}) }}" class="btn btn-info">View</a>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <div>
+                                        <a href="{{ path('app_products_edit', {'id': product.id}) }}" class="btn btn-warning">Edit</a>
+                                        <form method="post" action="{{ path('app_products_delete', {'id': product.id}) }}" style="display: inline-block">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                                            <button class="btn btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if is_granted('ROLE_ADMIN') %}
+            <div class="text-center mt-4">
+                <a href="{{ path('app_products_new') }}" class="btn btn-primary">Create New Product</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

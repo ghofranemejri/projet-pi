@@ -1,0 +1,150 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la Consultation{% endblock %}
+
+{% block body %}
+    <div class="pagetitle">
+        <h1>Consultation</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('admin_dashboard') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('app_consultation_index') }}">Consultations</a></li>
+                <li class="breadcrumb-item active">Détails</li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Informations de la Consultation</h5>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Id</th>
+                                    <td>{{ consultation.id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Patient</th>
+                                    <td>{{ consultation.nomPatient }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Médecin</th>
+                                    <td>{{ consultation.nomMedecin }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Date</th>
+                                    <td>{{ consultation.dateConsultation ? consultation.dateConsultation|date('Y-m-d H:i:s') : '' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="d-flex justify-content-between mt-3">
+                            <a href="{{ path('app_consultation_index') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Retour
+                            </a>
+                            <a href="{{ path('app_consultation_edit', {'id': consultation.id}) }}" class="btn btn-primary">
+                                <i class="bi bi-pencil"></i> Modifier
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Messages</h5>
+                        
+                        <div class="messages-container mb-3" style="max-height: 400px; overflow-y: auto;">
+                            {% for message in consultation.messages|sort((a, b) => b.createdAt <=> a.createdAt) %}
+                                <div class="alert {{ message.type == 'patient' ? 'alert-info' : 'alert-warning' }} mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>{{ message.type == 'patient' ? 'Patient' : 'Médecin' }}</strong>
+                                        <small>{{ message.createdAt|date('d/m/Y H:i') }}</small>
+                                    </div>
+                                    <hr class="my-2">
+                                    <p class="mb-0">{{ message.content }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="message-form">
+                            <div class="mb-3">
+                                <label for="messageType" class="form-label">Type de message</label>
+                                <select id="messageType" class="form-select">
+                                    <option value="patient">Patient</option>
+                                    <option value="doctor">Médecin</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="messageContent" class="form-label">Message</label>
+                                <textarea id="messageContent" class="form-control" rows="3"></textarea>
+                            </div>
+                            <button type="button" id="sendMessage" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Envoyer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sendButton = document.getElementById('sendMessage');
+    const messageContent = document.getElementById('messageContent');
+    const messageType = document.getElementById('messageType');
+    const messagesContainer = document.querySelector('.messages-container');
+
+    sendButton.addEventListener('click', function() {
+        const content = messageContent.value.trim();
+        const type = messageType.value;
+
+        if (!content) {
+            alert('Veuillez saisir un message');
+            return;
+        }
+
+        fetch('{{ path('app_consultation_show', {'id': consultation.id}) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `message=${encodeURIComponent(content)}&type=${encodeURIComponent(type)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+
+            const alertClass = type === 'patient' ? 'alert-info' : 'alert-warning';
+            const typeLabel = type === 'patient' ? 'Patient' : 'Médecin';
+
+            const messageHtml = `
+                <div class="alert ${alertClass} mb-2">
+                    <div class="d-flex justify-content-between">
+                        <strong>${typeLabel}</strong>
+                        <small>${data.createdAt}</small>
+                    </div>
+                    <hr class="my-2">
+                    <p class="mb-0">${data.content}</p>
+                </div>
+            `;
+
+            messagesContainer.insertAdjacentHTML('afterbegin', messageHtml);
+            messageContent.value = '';
+        })
+        .catch(error => {
+            alert('Erreur lors de l\'envoi du message: ' + error.message);
+        });
+    });
+});
+</script>
+{% endblock %}

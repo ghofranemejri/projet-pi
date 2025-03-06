@@ -1,0 +1,225 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Liste des Consultations{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .search-box {
+            position: relative;
+        }
+        .search-box .clear-search {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #6c757d;
+            display: none;
+        }
+        .search-box .clear-search:hover {
+            color: #343a40;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <h1 class="card-title mb-0">Liste des Consultations</h1>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <div class="search-box">
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher...">
+                                    <i class="bi bi-x-circle clear-search"></i>
+                                </div>
+                                <div class="date-filter d-flex gap-2">
+                                    <input type="text" id="startDate" class="form-control" placeholder="Date début">
+                                    <input type="text" id="endDate" class="form-control" placeholder="Date fin">
+                                    <button id="filterBtn" class="btn btn-secondary">
+                                        <i class="bi bi-funnel"></i> Filtrer
+                                    </button>
+                                    <button id="resetBtn" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+                                    </button>
+                                </div>
+                                <a href="{{ path('app_consultation_new') }}" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle"></i> Nouvelle Consultation
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% for message in app.flashes('success') %}
+                            <div class="alert alert-success">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Médecin</th>
+                                        <th>Patient</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="consultationsTable">
+                                {% for consultation in consultations %}
+                                    <tr>
+                                        <td>{{ consultation.id }}</td>
+                                        <td>{{ consultation.nomMedecin }}</td>
+                                        <td>{{ consultation.nomPatient }}</td>
+                                        <td>{{ consultation.dateConsultation ? consultation.dateConsultation|date('Y-m-d H:i') : '' }}</td>
+                                        <td>
+                                            <a href="{{ path('app_consultation_show', {'id': consultation.id}) }}" class="btn btn-info btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_consultation_edit', {'id': consultation.id}) }}" class="btn btn-warning btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_consultation_delete', {'id': consultation.id}) }}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette consultation ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ consultation.id) }}">
+                                                <button class="btn btn-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">Aucune consultation trouvée</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize date pickers
+            flatpickr("#startDate", {
+                locale: "fr",
+                dateFormat: "Y-m-d",
+                allowInput: true
+            });
+
+            flatpickr("#endDate", {
+                locale: "fr",
+                dateFormat: "Y-m-d",
+                allowInput: true
+            });
+
+            const searchInput = document.getElementById('searchInput');
+            const clearSearch = document.querySelector('.clear-search');
+            const startDate = document.getElementById('startDate');
+            const endDate = document.getElementById('endDate');
+            const filterBtn = document.getElementById('filterBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            let searchTimeout;
+
+            // Show/hide clear button
+            searchInput.addEventListener('input', function() {
+                clearSearch.style.display = this.value ? 'block' : 'none';
+            });
+
+            // Clear search
+            clearSearch.addEventListener('click', function() {
+                searchInput.value = '';
+                this.style.display = 'none';
+                filterConsultations();
+            });
+
+            // Reset all filters
+            resetBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                startDate.value = '';
+                endDate.value = '';
+                clearSearch.style.display = 'none';
+                filterConsultations();
+            });
+
+            // Search with debounce
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(filterConsultations, 300);
+            });
+
+            // Filter button click
+            filterBtn.addEventListener('click', filterConsultations);
+
+            // Filter function
+            function filterConsultations() {
+                const searchValue = searchInput.value;
+                const startDateValue = startDate.value;
+                const endDateValue = endDate.value;
+
+                const params = new URLSearchParams({
+                    search: searchValue,
+                    startDate: startDateValue,
+                    endDate: endDateValue
+                });
+
+                fetch(`{{ path('app_consultation_filter') }}?${params}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.getElementById('consultationsTable');
+                        tbody.innerHTML = '';
+
+                        if (data.length === 0) {
+                            tbody.innerHTML = `
+                                <tr>
+                                    <td colspan="5" class="text-center">Aucune consultation trouvée</td>
+                                </tr>`;
+                            return;
+                        }
+
+                        data.forEach(consultation => {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td>${consultation.id}</td>
+                                    <td>${consultation.nomMedecin}</td>
+                                    <td>${consultation.nomPatient}</td>
+                                    <td>${consultation.dateConsultation}</td>
+                                    <td>
+                                        <a href="${consultation.showUrl}" class="btn btn-info btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="${consultation.editUrl}" class="btn btn-warning btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form method="post" action="${consultation.deleteUrl}" style="display: inline-block" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette consultation ?');">
+                                            ${consultation.deleteToken}
+                                            <button class="btn btn-danger btn-sm">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>`;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Une erreur est survenue lors du filtrage des consultations.');
+                    });
+            }
+        });
+    </script>
+{% endblock %}

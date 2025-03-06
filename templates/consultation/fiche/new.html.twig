@@ -1,0 +1,54 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Nouvelle Fiche{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h1 class="card-title">Créer une nouvelle Fiche</h1>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_row(form.consultation) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_row(form.motif) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_row(form.diagnostic) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_row(form.traitement) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_row(form.nomPatient) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_row(form.nomMedecin) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_row(form.date) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_row(form.status) }}
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ path('app_fiche_index') }}" class="btn btn-secondary me-md-2">
+                                    <i class="bi bi-arrow-left"></i> Retour
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i> Enregistrer
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

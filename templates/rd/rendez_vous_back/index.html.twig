@@ -1,0 +1,157 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Liste des Rendez-Vous{% endblock %}
+
+{% block content %}
+{% set query = query|default('') %}
+
+<div class="container-fluid p-0 m-0">
+    <h1 class="text-center my-2">Liste des Rendez-Vous</h1>
+
+    <!-- Barre de recherche principale -->
+    <div class="d-flex px-2 mb-2">
+        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un rendez-vous..." value="{{ query }}">
+        <button id="searchButton" class="btn btn-primary ms-2">Rechercher</button>
+    </div>
+
+    <!-- Barre de tri local -->
+    <div class="d-flex gap-2 px-2 mb-2">
+        <input type="text" id="sortSearch" class="form-control" placeholder="Filtrer par motif ou patient...">
+        <select id="sortSelect" class="form-select" style="max-width: 200px;">
+            <option value="">Trier par...</option>
+            <option value="date">Date</option>
+            <option value="motif">Motif</option>
+            <option value="patient">Patient</option>
+        </select>
+    </div>
+
+    <!-- Tableau des rendez-vous -->
+    <div class="table-responsive px-2">
+        <table class="table table-sm table-striped table-hover table-bordered" id="posts-table">
+            <thead id="tableHeader" class="text-white" style="background-color: black;">
+                <tr>
+                    <th style="width: 50px; min-width: 50px;">ID</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Motif</th>
+                    <th>Patient</th>
+                    <th>Médecin</th>
+                    <th>Date de Création</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for rendez_vou in rendez_vouses %}
+                    <tr class="post-row">
+                        <td class="post-id">{{ rendez_vou.id }}</td>
+                        <td class="post-date">{{ rendez_vou.date ? rendez_vou.date|date('Y-m-d') : '' }}</td>
+                        <td class="post-statut">{{ rendez_vou.statut }}</td>
+                        <td class="post-motif">{{ rendez_vou.motif }}</td>
+                        <td class="post-patient">
+    {{ rendez_vou.patient is not null ? (rendez_vou.patient.email is not null ? rendez_vou.patient.email : 'Email inconnu') : 'N/A' }}
+</td>
+<td class="post-medecin">
+    {{ rendez_vou.medecin is not null ? (rendez_vou.medecin.email is not null ? rendez_vou.medecin.email : 'Email inconnu') : 'N/A' }}
+</td>
+<td class="post-dateCreation">{{ rendez_vou.dateCreation ? rendez_vou.dateCreation|date('Y-m-d') : '' }}</td>
+                        <td class="post-actions">
+                            <!-- Remplacement des boutons par des emojis -->
+                            <a href="{{ path('app_rendez_vous_show_back', {'id': rendez_vou.id}) }}" title="Voir">👁️</a>
+                            <a href="{{ path('app_rendez_vous_edit_back', {'id': rendez_vou.id}) }}" title="Éditer">📝</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">Aucun rendez-vous trouvé</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Boutons d'action déplacés avant le copyright -->
+    <div class="text-center my-4">
+        <button id="generatePdfButton" class="btn btn-danger">Générer le PDF</button>
+        <a href="{{ path('app_rendez_vous_new_back') }}" class="btn btn-success">Créer un nouveau rendez-vous</a>
+    </div>
+
+    <!-- Section Copyright -->
+    <div class="text-center mt-4">
+        <p>© Copyright <strong>eConsult+</strong>. All Rights Reserved</p>
+        <p>Designed by <a href="https://bootstrapmade.com/" target="_blank">BootstrapMade</a></p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const searchInput = document.getElementById("searchInput");
+        const searchButton = document.getElementById("searchButton");
+        const tableBody = document.getElementById("tableBody");
+        const tableHeader = document.getElementById("tableHeader");
+        const sortSearch = document.getElementById("sortSearch");
+        const sortSelect = document.getElementById("sortSelect");
+
+        // Fonction pour effectuer la recherche Ajax
+        function searchRendezVous(query) {
+            fetch(`/rendez/back/rendez-vous/recherche?q=${encodeURIComponent(query)}`, {
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            })
+            .then(response => response.text())
+            .then(html => {
+                tableBody.innerHTML = html;
+                // Cache l'en-tête si un résultat est trouvé
+                tableHeader.style.display = html.trim() ? "none" : "table-header-group";
+            })
+            .catch(error => console.error('Erreur lors de la recherche:', error));
+        }
+
+        // Lancer la recherche au clic sur le bouton
+        searchButton.addEventListener("click", () => {
+            const query = searchInput.value.trim();
+            searchRendezVous(query);
+        });
+
+        // Recherche dynamique sur la touche "Entrée"
+        searchInput.addEventListener("keyup", (event) => {
+            if (event.key === "Enter") {
+                searchButton.click();
+            }
+        });
+
+        // Filtrage local sur motif ou patient
+        sortSearch.addEventListener("keyup", function() {
+            const filter = this.value.toLowerCase();
+            document.querySelectorAll(".post-row").forEach(row => {
+                const motif = row.querySelector(".post-motif").textContent.toLowerCase();
+                const patient = row.querySelector(".post-patient").textContent.toLowerCase();
+                row.style.display = (motif.includes(filter) || patient.includes(filter)) ? '' : 'none';
+            });
+        });
+
+        // Tri local
+        sortSelect.addEventListener("change", function() {
+            const sortBy = this.value;
+            const rows = Array.from(document.querySelectorAll(".post-row"));
+
+            rows.sort((a, b) => {
+                if (sortBy === "date") {
+                    return new Date(b.querySelector(".post-date").textContent) - new Date(a.querySelector(".post-date").textContent);
+                } else if (sortBy === "motif") {
+                    return a.querySelector(".post-motif").textContent.localeCompare(b.querySelector(".post-motif").textContent);
+                } else if (sortBy === "patient") {
+                    return a.querySelector(".post-patient").textContent.localeCompare(b.querySelector(".post-patient").textContent);
+                }
+                return 0;
+            });
+
+            rows.forEach(row => tableBody.appendChild(row));
+        });
+
+        // Génération du PDF
+        document.getElementById("generatePdfButton").addEventListener("click", () => {
+            window.location.href = "{{ path('app_rendez_vous_pdf') }}";
+        });
+    });
+</script>
+
+{% endblock %}

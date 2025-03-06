@@ -1,0 +1,150 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Liste des Prescriptions{% endblock %}
+
+{% block content %}
+<style>
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.page-item {
+    margin: 0 5px;
+}
+
+.page {
+    color: #007bff !important;
+    background-color: #fff !important;
+    border: 1px solid #007bff !important;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.page:hover {
+    background-color: #007bff !important;
+    color: #fff !important;
+}
+
+
+.current {
+    background-color: #007bff !important;
+    color: #fff !important;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+</style>
+<div class="pagetitle">
+    <h1>Liste des Prescriptions</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_backpage') }}">Home</a></li>
+            <li class="breadcrumb-item active">Liste des Prescriptions</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="container mt-4">
+    <a href="{{ path('prescription_new') }}" class="btn btn-primary mb-3">Ajouter une Prescription</a>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Date Début</th>
+                        <th>Date Fin</th>
+                        <th>Adresse</th>
+                        <th>Patient</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prescription in prescriptions %}
+                        <tr>
+                            <td>{{ prescription.datedeb|date('d/m/Y') }}</td>
+                            <td>{{ prescription.datefin|date('d/m/Y') }}</td>
+                            <td>{{ prescription.address }}</td>
+<td>{{ app.user.email }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#prescriptionModal{{ prescription.id }}">Voir Détails</button>
+                                <a href="{{ path('prescription_edit', {id: prescription.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+                                <form method="post" action="{{ path('prescription_delete', {id: prescription.id}) }}" style="display:inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette prescription ?');">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ prescription.id) }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">Supprimer</button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        <!-- Modal for Prescription Details -->
+                        <div class="modal fade" id="prescriptionModal{{ prescription.id }}" tabindex="-1" role="dialog" aria-labelledby="prescriptionModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Détails de la Prescription</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p><strong>Patient:</strong> <td>{{ app.user.email }}</td>
+ </p>
+                                        <p><strong>Date Début:</strong> {{ prescription.datedeb|date('d/m/Y') }}</p>
+                                        <p><strong>Date Fin:</strong> {{ prescription.datefin|date('d/m/Y') }}</p>
+                                        <p><strong>Adresse:</strong> {{ prescription.address }}</p>
+
+                                        <h5>Traitements Associés</h5>
+                                        <ul>
+                                            {% for traitement in prescription.medicaments %}
+                                                <li>
+                                                    {{ traitement.medicament }} - {{ traitement.dose }}mg - {{ traitement.description }}
+                                                    <a href="{{ path('traitement_edit', {id: traitement.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+                                                    <a href="{{ path('traitement_delete', {id: traitement.id}) }}" class="btn btn-danger btn-sm">Supprimer</a>
+                                                </li>
+                                            {% else %}
+                                                <li>Aucun traitement associé</li>
+                                            {% endfor %}
+                                        </ul>
+
+                                        <a href="{{ path('traitement_create', {id: prescription.id}) }}" class="btn btn-primary">Ajouter un Traitement</a>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <tr>
+                            <td colspan="5">Aucune prescription trouvée.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination Links -->
+            <div class="d-flex justify-content-center">
+                {{ knp_pagination_render(prescriptions) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+
+<script>
+    {% for prescription in prescriptions %}
+        $('#prescriptionModal{{ prescription.id }}').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var modal = $(this);
+        });
+    {% endfor %}
+</script>
+
+{% endblock %}

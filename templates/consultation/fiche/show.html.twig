@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Fiche{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+            {% for notification in fiche.dateChangeNotifications %}
+                {% if not notification.isRead %}
+                    <div class="col-12">
+                        <div class="alert alert-info py-2 px-3 mb-2 small" role="alert" style="font-size: 0.85rem;">
+                            <i class="bi bi-bell-fill me-1"></i>
+                            Date modifiée: {{ notification.oldDate|date('d/m/Y H:i') }} → {{ notification.newDate|date('d/m/Y H:i') }}
+                            <button type="button" class="btn-close btn-close-sm float-end" data-bs-dismiss="alert" aria-label="Close" 
+                                    onclick="markNotificationsAsRead('{{ path('app_fiche_mark_notifications_read', {'id': fiche.id}) }}')"
+                                    style="font-size: 0.7rem; margin-top: 2px;">
+                            </button>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="card-title">Détails de la Fiche</h5>
+                            <div class="btn-group">
+                                <a href="{{ path('app_fiche_pdf', {'id': fiche.id}) }}" class="btn btn-primary" target="_blank">
+                                    <i class="bi bi-file-pdf me-1"></i> Exporter PDF
+                                </a>
+                                <a href="{{ path('app_fiche_edit', {'id': fiche.id}) }}" class="btn btn-warning">
+                                    <i class="bi bi-pencil me-1"></i> Modifier
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Informations Patient</h6>
+                                <p><strong>Nom:</strong> {{ fiche.nomPatient }}</p>
+                                <p><strong>Date de Consultation:</strong> {{ fiche.consultationDate ? fiche.consultationDate|date('d/m/Y H:i') : '' }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Informations Médecin</h6>
+                                <p>
+                                    <strong>Médecin:</strong> {{ fiche.nomMedecin }}
+                                    <span class="ms-2">
+                                        {% set avgRating = fiche.averageRating %}
+                                        {% for i in 1..5 %}
+                                            {% if i <= avgRating %}
+                                                <i class="bi bi-star-fill text-warning"></i>
+                                            {% elseif i <= avgRating + 0.5 %}
+                                                <i class="bi bi-star-half text-warning"></i>
+                                            {% else %}
+                                                <i class="bi bi-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <small class="text-muted">({{ fiche.reviews|length }} avis)</small>
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+
+                        {% if fiche.motif %}
+                            <div class="mb-4">
+                                <h6 class="text-muted">Motif de la Consultation</h6>
+                                <p class="card-text">{{ fiche.motif }}</p>
+                            </div>
+                        {% endif %}
+
+                        {% if fiche.diagnostic %}
+                            <div class="mb-4">
+                                <h6 class="text-muted">Diagnostic</h6>
+                                <p class="card-text">{{ fiche.diagnostic }}</p>
+                            </div>
+                        {% endif %}
+
+                        {% if fiche.traitement %}
+                            <div class="mb-4">
+                                <h6 class="text-muted">Traitement</h6>
+                                <p class="card-text">{{ fiche.traitement }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Reviews Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Avis et Évaluations</h5>
+                        
+                        <!-- Add Review Form -->
+                        <div class="mb-4">
+                            {{ form_start(reviewForm) }}
+                            <div class="rating-stars mb-3">
+                                {{ form_widget(reviewForm.rating) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_widget(reviewForm.comment) }}
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-star me-1"></i> Donner mon avis
+                            </button>
+                            {{ form_end(reviewForm) }}
+                        </div>
+
+                        <!-- Reviews List -->
+                        <div class="reviews-list">
+                            {% for review in fiche.reviews %}
+                                <div class="review-item mb-3 pb-3 border-bottom">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>{{ review.patientName }}</strong>
+                                            <div class="text-warning">
+                                                {% for i in 1..5 %}
+                                                    {% if i <= review.rating %}
+                                                        <i class="bi bi-star-fill"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ review.createdAt|date('d/m/Y') }}
+                                        </small>
+                                    </div>
+                                    {% if review.comment %}
+                                        <p class="mb-0 mt-2">{{ review.comment }}</p>
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <p class="text-muted">Aucun avis pour le moment.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+function markNotificationsAsRead(url) {
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }).then(response => {
+        if (!response.ok) {
+            console.error('Error marking notifications as read');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingInputs = document.querySelectorAll('.rating-select input[type="radio"]');
+    ratingInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            ratingInputs.forEach(ri => {
+                const label = ri.nextElementSibling;
+                if (ri.value <= this.value) {
+                    label.querySelector('i').classList.remove('bi-star');
+                    label.querySelector('i').classList.add('bi-star-fill');
+                } else {
+                    label.querySelector('i').classList.remove('bi-star-fill');
+                    label.querySelector('i').classList.add('bi-star');
+                }
+            });
+        });
+    });
+});
+</script>
+
+<style>
+    .rating-stars {
+        font-size: 1.5em;
+    }
+    .rating-select {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+    .rating-select input[type="radio"] {
+        display: none;
+    }
+    .rating-select label {
+        cursor: pointer;
+        width: 1em;
+        font-family: bootstrap-icons;
+    }
+    .rating-select label:before {
+        content: "\F588";
+        color: #ffc107;
+    }
+    .rating-select input[type="radio"]:checked ~ label:before {
+        content: "\F586";
+    }
+</style>
+{% endblock %}

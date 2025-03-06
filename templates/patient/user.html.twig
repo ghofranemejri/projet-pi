@@ -1,0 +1,9 @@
+{# templates/patient/user.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Espace Patient{% endblock %}
+
+{% block body %}
+    <h1>Bienvenue dans votre espace patient</h1>
+    <p>Vous êtes connecté en tant que {{ app.user.email }}.</p>
+{% endblock %}

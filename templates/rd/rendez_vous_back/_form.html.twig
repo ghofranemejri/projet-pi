@@ -1,0 +1,45 @@
+{# templates/rendez_vous_back/_form.html.twig #}
+{{ form_start(form) }}
+
+<div class="mb-3">
+    {{ form_label(form.date, 'Date du rendez-vous', {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+    {{ form_errors(form.date) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.statut, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.statut, {'attr': {'class': 'form-control'}}) }}
+    {{ form_errors(form.statut) }}
+</div>
+
+{# Le champ "motif" est ici, juste après "statut" #}
+<div class="mb-3">
+    {{ form_label(form.motif, 'Motif', {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.motif, {'attr': {'class': 'form-control'}}) }}
+    {{ form_errors(form.motif) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.patient, 'Patient', {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.patient, {'attr': {'class': 'form-control'}}) }}
+    {{ form_errors(form.patient) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.medecin, 'Médecin', {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.medecin, {'attr': {'class': 'form-control'}}) }}
+    {{ form_errors(form.medecin) }}
+</div>
+
+<div class="mb-3">
+    {{ form_label(form.date_creation, 'Date de création', {'label_attr': {'class': 'form-label'}}) }}
+    {{ form_widget(form.date_creation, {'attr': {'class': 'form-control'}}) }}
+    {{ form_errors(form.date_creation) }}
+</div>
+
+<!-- Bouton Save avec emoji 💾 sans fond ni bordure -->
+<button type="submit" class="btn" style="background: none; border: none; font-size: 24px;">
+    💾
+</button>
+{{ form_end(form) }}

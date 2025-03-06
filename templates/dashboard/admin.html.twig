@@ -1,6 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <h1>Bienvenue, Admin {{ user.email }}</h1>
-    <p>Vous êtes connecté en tant qu'administrateur.</p>
+    <div style="text-align: center; padding: 50px; background-color: #f8f9fa; border-radius: 10px; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+        <h1 style="color: #2c3e50;">Bienvenue, Admin {{ user.email }}</h1>
+        <p style="font-size: 18px; color: #7f8c8d;">Vous êtes connecté en tant qu'administrateur.</p>
+        <a href="{{ path('adminn_dashboard') }}" style="display: inline-block; padding: 12px 24px; margin-top: 20px; background-color:rgb(9, 77, 141); color: white; text-decoration: none; font-size: 16px; border-radius: 5px; transition: 0.3s;">
+            Aller au Tableau de Bord
+        </a>
+    </div>
 {% endblock %}

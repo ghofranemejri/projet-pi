@@ -1,0 +1,131 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Welcome to Our Store{% endblock %}
+
+{% block body %}
+<!-- ======= Hero Section ======= -->
+<section id="hero" class="d-flex align-items-center">
+    <div class="container">
+        <h1>Welcome to Our Store</h1>
+        <h2>Discover our amazing products at great prices</h2>
+        <a href="{{ path('app_products_index') }}" class="btn-get-started scrollto">Shop Now</a>
+    </div>
+</section>
+
+<main id="main">
+    <!-- ======= Best Seller Section ======= -->
+    {% if bestSeller %}
+    <section id="best-seller" class="best-seller py-5">
+        <div class="container">
+            <div class="section-title">
+                <h2>Best Seller</h2>
+                <p>Our most popular product</p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card">
+                        {% if bestSeller.image %}
+                        <img src="{{ asset(bestSeller.image) }}" alt="{{ bestSeller.id }}" class="card-img-top" style="max-height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Product #{{ bestSeller.id }}</h5>
+                            <p class="card-text">
+                                Price: ${{ bestSeller.prix }}<br>
+                                Stock: {{ bestSeller.quantite }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ======= Featured Products Section ======= -->
+    <section id="featured-services" class="featured-services py-5">
+        <div class="container">
+            <div class="section-title">
+                <h2>Featured Products</h2>
+                <p>Check out our latest products</p>
+            </div>
+
+            <div class="row">
+                {% for product in featuredProducts %}
+                <div class="col-md-4 col-lg-4 mb-4">
+                    <div class="card">
+                        {% if product.image %}
+                        <img src="{{ asset(product.image) }}" alt="{{ product.id }}" class="card-img-top" style="max-height: 200px; object-fit: cover;">
+                        {% endif %}
+                        <div class="card-body text-center">
+                            <h5 class="card-title">Product #{{ product.id }}</h5>
+                            <p class="card-text">
+                                Price: ${{ product.prix }}<br>
+                                Stock: {{ product.quantite }}
+                            </p>
+                            <a href="{{ path('app_products_show', {'id': product.id}) }}" class="btn btn-primary mt-3">View Details</a>
+                        </div>
+                         <!-- Affichage du code-barres -->
+                        <div class="barcode mt-3">
+                            <img src="{{ asset('/barcodes/barcode_' ~ product.id ~ '.png') }}" alt="Barcode" style="max-width: 100%; height: auto;">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- ======= Why Us Section ======= -->
+    <section id="why-us" class="why-us py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 d-flex align-items-stretch mb-4 mb-lg-0">
+                    <div class="card w-100">
+                        <div class="card-body">
+                            <h3 class="card-title">Why Choose Our Store?</h3>
+                            <p>
+                                We offer quality products at competitive prices. Our store is known for excellent customer service and fast delivery.
+                            </p>
+                            <div class="text-center">
+                                <a href="{{ path('app_products_index') }}" class="btn btn-outline-primary">Learn More <i class="bx bx-chevron-right"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 d-flex align-items-stretch">
+                    <div class="card w-100">
+                        <div class="card-body">
+                            <h3 class="card-title mb-4">Our Key Features</h3>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="icon-box mb-3">
+                                        <i class="bx bx-receipt"></i>
+                                        <h5>Quality Products</h5>
+                                        <p>We ensure all our products meet high quality standards</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="icon-box mb-3">
+                                        <i class="bx bx-cube-alt"></i>
+                                        <h5>Fast Shipping</h5>
+                                        <p>Quick delivery to your doorstep</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="icon-box mb-3">
+                                        <i class="bx bx-images"></i>
+                                        <h5>Best Prices</h5>
+                                        <p>Competitive prices for all our products</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Messages</h2>
+    <div id="messages" class="border p-3" style="height: 400px; overflow-y: scroll;">
+        <!-- Messages will be loaded here -->
+    </div>
+    <form id="messageForm" class="mt-3">
+        <div class="input-group">
+            <input type="text" id="messageInput" class="form-control" placeholder="Écrire un message..." required>
+            <button class="btn btn-primary" type="submit">Envoyer</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const messageForm = document.getElementById("messageForm");
+    const messageInput = document.getElementById("messageInput");
+    const messagesDiv = document.getElementById("messages");
+
+    function refreshMessages() {
+        fetch("{{ path('fetch_messages') }}")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                messagesDiv.innerHTML = "";
+                data.messages.forEach(message => {
+                    const div = document.createElement("div");
+                    div.classList.add("mb-2");
+                    if (message.sender_id === {{ app.user ? app.user.id : 0 }}) {
+                        div.classList.add("text-end");
+                    }
+
+                    div.innerHTML = `<strong>${message.sender_name}</strong>: ${message.content}
+                        <small class="text-muted d-block">${message.created_at}</small>`;
+
+                    messagesDiv.appendChild(div);
+                });
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            })
+            .catch(error => console.error("Erreur lors du chargement des messages:", error));
+    }
+
+    messageForm.addEventListener("submit", function(event) {
+        event.preventDefault();
+        const messageText = messageInput.value.trim();
+
+        if (messageText) {
+            fetch("{{ path('send_message') }}", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify({ content: messageText })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error || "Unknown error"); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    messageInput.value = "";
+                    refreshMessages();
+                } else {
+                    console.error("Error:", data.error);
+                }
+            })
+            .catch(error => console.error("Fetch error:", error));
+        }
+    });
+
+    setInterval(refreshMessages, 5000);
+    refreshMessages();
+});
+</script>
+{% endblock %}

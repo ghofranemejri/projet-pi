@@ -1,0 +1,249 @@
+{% extends 'base2.html.twig' %}
+
+{% block title %}FormPost Index{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">📋 FormPost Index</h1>
+
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{{ path('app_form_back_new') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Créer un nouveau post
+        </a>
+    </div>
+
+    <!-- Barre de recherche et de tri -->
+    <div class="mb-3 d-flex gap-2">
+        <input type="text" id="search" class="form-control" placeholder="Rechercher par nom ou description...">
+        <select id="sort" class="form-select">
+            <option value="">Trier par...</option>
+            <option value="name">Nom</option>
+            <option value="date">Date</option>
+            <option value="comments">Nombre de commentaires</option>
+        </select>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="posts-table">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Commentaires</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for form_post in pagination %}
+                    <tr class="post-row">
+                        <td>{{ loop.index }}</td>
+                        <td class="post-name">{{ form_post.nom }}</td>
+                        <td class="post-date">{{ form_post.date ? form_post.date|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                        <td class="post-description">{{ form_post.description }}</td>
+                        <td class="post-comments" data-count="{{ form_post.reponses|length }}">
+                        <button class="btn btn-sm btn-secondary comment-btn" data-id="{{ form_post.id }}">
+                        <i class="fas fa-comment"></i> ({{ form_post.reponses|length }})
+                        </button>   
+                       <!-- Comment Section -->
+                        <div class="comments-section mt-3" id="comments-{{ form_post.id }}" style="display: none;">
+                            <h6>Commentaires (<span id="comment-count-section-{{ form_post.id }}">{{ form_post.reponses|length }}</span>)</h6>
+                            <div class="comments-list" id="comments-list-{{ form_post.id }}">
+                                {% for reponse in form_post.reponses %}
+                                    <div class="comment bg-light p-2 rounded mb-2">{{ reponse.contenu }}</div>
+                                {% endfor %}
+                            </div>
+                            <textarea class="form-control mb-2 comment-text" placeholder="Ajoutez un commentaire..."></textarea>
+                            <a href="{{ path('app_reponse_back_new', {'formPostId': form_post.id}) }}" class="btn btn-sm btn-primary">
+                            Ajouter un commentaire
+                            </a>   
+           
+                        <td>
+                            <a href="{{ path('app_form_back_edit', {'id': form_post.id}) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <button class="btn btn-sm btn-danger delete-btn"
+                                data-url="{{ path('app_form_back_delete', {'id': form_post.id}) }}"
+                                data-token="{{ csrf_token('delete' ~ form_post.id) }}">
+                                <i class="fas fa-trash-alt"></i> Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">Aucun enregistrement trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination placée en dehors de la boucle -->
+   <!-- Pagination -->
+<div class="d-flex justify-content-center mt-4">
+    {{ knp_pagination_render(pagination) }}
+</div>
+<div class="text-center mt-4">
+    <button id="toggleStats" class="btn btn-info">
+        📊 Voir les statistiques
+    </button>
+</div>
+<div class="mt-5" id="statsContainer" style="display: none;">
+    <h2 class="text-center">📊 Statistiques des commentaires</h2>
+    <canvas id="commentsChart"></canvas>
+</div>
+
+<script>
+// TOGGLE COMMENT SECTION
+    document.querySelectorAll('.comment-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            let postId = this.getAttribute('data-id');
+            let commentSection = document.getElementById('comments-' + postId);
+            commentSection.style.display = commentSection.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+    
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Suppression avec SweetAlert
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            let url = this.getAttribute('data-url');
+            let token = this.getAttribute('data-token');
+
+            Swal.fire({
+                title: "Êtes-vous sûr ?",
+                text: "Cette action est irréversible !",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Oui, supprimer !"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(url, {
+                        method: "POST",
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest",
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: new URLSearchParams({ _token: token })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire("Supprimé !", "L'élément a été supprimé.", "success")
+                                .then(() => location.reload());
+                        } else {
+                            Swal.fire("Erreur", "Impossible de supprimer.", "error");
+                        }
+                    })
+                    .catch(() => Swal.fire("Erreur", "Une erreur est survenue.", "error"));
+                }
+            });
+        });
+    });
+
+    // Tri et Filtrage
+    document.getElementById('search').addEventListener('keyup', function() {
+        let filter = this.value.toLowerCase();
+        document.querySelectorAll('.post-row').forEach(row => {
+            let name = row.querySelector('.post-name').textContent.toLowerCase();
+            let description = row.querySelector('.post-description').textContent.toLowerCase();
+            row.style.display = (name.includes(filter) || description.includes(filter)) ? '' : 'none';
+        });
+    });
+
+    document.getElementById('sort').addEventListener('change', function() {
+        let rows = Array.from(document.querySelectorAll('.post-row'));
+        let sortBy = this.value;
+        
+        rows.sort((a, b) => {
+            if (sortBy === 'name') {
+                return a.querySelector('.post-name').textContent.localeCompare(b.querySelector('.post-name').textContent);
+            } else if (sortBy === 'date') {
+                return new Date(b.querySelector('.post-date').textContent) - new Date(a.querySelector('.post-date').textContent);
+            } else if (sortBy === 'comments') {
+                return b.querySelector('.post-comments').getAttribute('data-count') - a.querySelector('.post-comments').getAttribute('data-count');
+            }
+        });
+
+        let tbody = document.querySelector('#posts-table tbody');
+        tbody.innerHTML = '';
+        rows.forEach(row => tbody.appendChild(row));
+    });
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let chartInstance = null; // Pour stocker le graphique
+
+    document.getElementById("toggleStats").addEventListener("click", function () {
+        let statsContainer = document.getElementById("statsContainer");
+
+        if (statsContainer.style.display === "none") {
+            statsContainer.style.display = "block";
+            generateChart();
+            this.textContent = "❌ Masquer les statistiques";
+        } else {
+            statsContainer.style.display = "none";
+            if (chartInstance) {
+                chartInstance.destroy(); // Détruire le graphique si on masque
+            }
+            this.textContent = "📊 Voir les statistiques";
+        }
+    });
+
+    function generateChart() {
+        let postNames = [];
+        let commentCounts = [];
+
+        document.querySelectorAll('.post-row').forEach(row => {
+            let name = row.querySelector('.post-name').textContent;
+            let commentCount = row.querySelector('.post-comments').getAttribute('data-count');
+
+            postNames.push(name);
+            commentCounts.push(parseInt(commentCount));
+        });
+
+        const ctx = document.getElementById('commentsChart').getContext('2d');
+
+        // Vérifier et détruire l'ancien graphique s'il existe
+        if (chartInstance) {
+            chartInstance.destroy();
+        }
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: postNames,
+                datasets: [{
+                    label: 'Nombre de commentaires',
+                    data: commentCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stepSize: 1
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+
+{% endblock %}

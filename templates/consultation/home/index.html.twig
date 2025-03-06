@@ -1,0 +1,229 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}eConsult+ - Votre Plateforme de Consultation en Ligne{% endblock %}
+
+{% block body_class %}index-page{% endblock %}
+
+{% block body %}
+    <!-- Hero Section -->
+    <section id="hero" class="hero section light-background">
+        <img src="{{ asset('assets/img/hero-bg.jpg') }}" alt="" data-aos="fade-in">
+
+        <div class="container position-relative">
+            <div class="welcome position-relative" data-aos="fade-down" data-aos-delay="100">
+                <h2>BIENVENUE SUR eCONSULT+</h2>
+                <p>eConsult+ est une plateforme de consultation en ligne qui met en relation les utilisateurs avec des experts de différents domaines (santé, droit, coaching, etc.). Elle propose une solution intuitive, abordable et accessible à tout moment.</p>
+            </div>
+
+            <div class="content row gy-4">
+                <div class="col-lg-4 d-flex align-items-stretch">
+                    <div class="why-box" data-aos="zoom-out" data-aos-delay="200">
+                        <h3>Pourquoi Choisir eCONSULT+?</h3>
+                        <p>Avec eConsult+, les consultations en ligne deviennent plus faciles, abordables et accessibles à tous. Une solution pensée pour simplifier la vie des utilisateurs et répondre à leurs besoins en toute simplicité.</p>
+                        <div class="text-center">
+                            <a href="#about" class="more-btn"><span>En Savoir Plus</span> <i class="bi bi-chevron-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-8 d-flex align-items-stretch">
+                    <div class="row gy-4">
+                        <div class="col-xl-4" data-aos="fade-up" data-aos-delay="200">
+                            <div class="icon-box d-flex flex-column justify-content-center align-items-center">
+                                <i class="bi bi-clock-history"></i>
+                                <h4>Disponible 24/7</h4>
+                                <p>Accédez à nos services à tout moment, où que vous soyez</p>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-4" data-aos="fade-up" data-aos-delay="300">
+                            <div class="icon-box d-flex flex-column justify-content-center align-items-center">
+                                <i class="bi bi-shield-check"></i>
+                                <h4>Experts Qualifiés</h4>
+                                <p>Une équipe d'experts certifiés à votre service</p>
+                            </div>
+                        </div>
+
+                        <div class="col-xl-4" data-aos="fade-up" data-aos-delay="400">
+                            <div class="icon-box d-flex flex-column justify-content-center align-items-center">
+                                <i class="bi bi-cash-coin"></i>
+                                <h4>Prix Abordables</h4>
+                                <p>Des tarifs compétitifs adaptés à tous les budgets</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about section">
+        <div class="container">
+            <div class="row gy-4 gx-5">
+                <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="200">
+                    <img src="{{ asset('assets/img/about.jpg') }}" class="img-fluid" alt="">
+                    <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8" class="glightbox pulsating-play-btn"></a>
+                </div>
+
+                <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="100">
+                    <h3>À Propos de Nous</h3>
+                    <p>eConsult+ est née de la volonté de rendre les consultations professionnelles plus accessibles à tous. Notre plateforme connecte les utilisateurs avec des experts qualifiés dans divers domaines.</p>
+                    <ul>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <div>
+                                <h5>Consultation en Ligne Simplifiée</h5>
+                                <p>Une interface intuitive pour des consultations rapides et efficaces</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <div>
+                                <h5>Experts Certifiés</h5>
+                                <p>Une sélection rigoureuse de nos experts pour garantir des consultations de qualité</p>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-check-circle-fill"></i>
+                            <div>
+                                <h5>Support Client 24/7</h5>
+                                <p>Une équipe dédiée pour vous accompagner à chaque étape</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services section">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Nos Services</h2>
+            <p>Découvrez notre large gamme de services de consultation en ligne</p>
+        </div>
+
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="service-item">
+                        <div class="icon"><i class="bi bi-heart-pulse"></i></div>
+                        <h4>Consultation Médicale</h4>
+                        <p>Consultez nos médecins en ligne pour un avis médical rapide et professionnel</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-item">
+                        <div class="icon"><i class="bi bi-briefcase"></i></div>
+                        <h4>Consultation Juridique</h4>
+                        <p>Obtenez des conseils juridiques personnalisés de nos avocats experts</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="service-item">
+                        <div class="icon"><i class="bi bi-person-check"></i></div>
+                        <h4>Coaching Personnel</h4>
+                        <p>Développez votre potentiel avec nos coachs professionnels</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="stats section light-background">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row gy-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-item text-center w-100 h-100">
+                        <span>1000+</span>
+                        <p>Consultations</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-item text-center w-100 h-100">
+                        <span>50+</span>
+                        <p>Experts</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-item text-center w-100 h-100">
+                        <span>95%</span>
+                        <p>Satisfaction</p>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stats-item text-center w-100 h-100">
+                        <span>24/7</span>
+                        <p>Support</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact section">
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Contact</h2>
+            <p>Besoin d'aide ? N'hésitez pas à nous contacter</p>
+        </div>
+
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="100">
+                    <div class="contact-info">
+                        <h3>Contactez-nous</h3>
+                        <p>Pour toute question ou assistance, notre équipe est à votre disposition :</p>
+                        <div class="info-item d-flex">
+                            <i class="bi bi-geo-alt"></i>
+                            <div>
+                                <h4>Localisation:</h4>
+                                <p>Tunis, Tunisia</p>
+                            </div>
+                        </div>
+                        <div class="info-item d-flex">
+                            <i class="bi bi-envelope"></i>
+                            <div>
+                                <h4>Email:</h4>
+                                <p>salim.maatali@esprit.tn</p>
+                            </div>
+                        </div>
+                        <div class="info-item d-flex">
+                            <i class="bi bi-phone"></i>
+                            <div>
+                                <h4>Téléphone:</h4>
+                                <p>+216 99 802 182</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                    <form action="#" method="post" class="contact-form">
+                        <div class="row gy-4">
+                            <div class="col-md-6">
+                                <input type="text" name="name" class="form-control" placeholder="Votre Nom" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="email" name="email" class="form-control" placeholder="Votre Email" required>
+                            </div>
+                            <div class="col-md-12">
+                                <input type="text" name="subject" class="form-control" placeholder="Sujet" required>
+                            </div>
+                            <div class="col-md-12">
+                                <textarea name="message" class="form-control" rows="6" placeholder="Message" required></textarea>
+                            </div>
+                            <div class="col-md-12 text-center">
+                                <button type="submit" class="btn btn-primary">Envoyer Message</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
